@@ -1,202 +1,240 @@
-# core/pipeline/engine.py
 from __future__ import annotations
 
-import json
-import subprocess
-import sys
+import json, subprocess, sys, shlex, os
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
-
-# ---------- JSON helpers -----------------------------------------------------
+from .registry import ModuleSpec, resolve_ids, load_index
 
 def _json_default(o: Any):
-    if isinstance(o, Path):
-        return str(o)
-    if isinstance(o, datetime):
-        return o.isoformat()
-    if isinstance(o, Enum):
-        return o.value
+    if isinstance(o, Path): return str(o)
+    if isinstance(o, datetime): return o.isoformat()
+    if isinstance(o, Enum): return o.value
     return str(o)
-
-# ---------- Config helpers ---------------------------------------------------
-
-def _cfg_get(cfg: Any, *names: str, default=None):
-    """Fetch first present value among names from either object attrs or dict keys."""
-    for n in names:
-        v = getattr(cfg, n, None)
-        if v is not None:
-            return v
-        if isinstance(cfg, dict):
-            v = cfg.get(n, None)
-            if v is not None:
-                return v
-    return default
 
 def _ensure_dir(p: Path) -> Path:
     p.mkdir(parents=True, exist_ok=True)
     return p
 
-# ---------- Module resolution & execution ------------------------------------
-
-def _resolve_entrypoint(mod_path: Union[str, Path]) -> Path:
-    p = Path(mod_path)
-    if p.is_dir():
-        p = p / "main.py"
+def _resolve_entrypoint(path_or_dir: Union[str, Path]) -> Path:
+    p = Path(path_or_dir)
+    if p.is_dir(): p = p / "main.py"
     return p.resolve()
 
-def run_module(entrypoint: Union[str, Path],
-               payload: Dict[str, Any],
-               timeout_sec: int | None = None) -> Dict[str, Any]:
-    ep = _resolve_entrypoint(entrypoint)
-    started = datetime.utcnow()
+# -------- Docker runner ------------------------------------------------------
 
-    if not ep.exists():
-        return {
-            "status": "error",
-            "error": f"Entrypoint not found: {ep}",
-            "started_at": started.isoformat(),
-            "ended_at": datetime.utcnow().isoformat(),
-        }
+def _host_path_for_volume(name: str, m_input: Dict[str, Any], spec: ModuleSpec) -> Path:
+    # Standard names map to the run's dirs; cache maps to data/cache/<module-id>
+    base = Path.cwd()
+    if name == "artifacts": return Path(m_input["artifacts_dir"])
+    if name == "workspace": return Path(m_input["workspace_dir"])
+    if name == "inputs":    return Path(m_input["inputs_dir"])
+    if name == "reports":   return Path(m_input["reports_dir"])
+    if name == "cache":     return base / "data" / "cache" / spec.id.replace(".", "_")
+    # Fallback: nested under workspace
+    return Path(m_input["workspace_dir"]) / name
+
+
+
+
+def _run_module_docker(spec: ModuleSpec, m_input: Dict[str, Any]) -> Dict[str, Any]:
+    from copy import deepcopy
+    started = datetime.utcnow()
+    if not spec.image:
+        return {"status":"error","error":"docker runtime requires 'image' in manifest",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                "module_entrypoint":"<docker>"}
+
+    cmd = ["docker","run","--rm","-i","--cap-drop","ALL","--security-opt","no-new-privileges"]
+
+    # Resources
+    if spec.resources and spec.resources.cpu:    cmd += ["--cpus",  spec.resources.cpu]
+    if spec.resources and spec.resources.memory: cmd += ["--memory", spec.resources.memory]
+    if spec.user:    cmd += ["--user", spec.user]
+    if spec.network: cmd += ["--network", spec.network]
+    if spec.workdir: cmd += ["-w", spec.workdir]
+
+    # Volumes: build mounts and a container-path map
+    vols = spec.volumes or []
+    container_paths: dict[str, str] = {}  # logical name -> container path
+    for v in vols:
+        # Map host path by logical name
+        if v.name == "artifacts":
+            host = Path(m_input["artifacts_dir"])
+        elif v.name == "workspace":
+            host = Path(m_input["workspace_dir"])
+        elif v.name == "inputs":
+            host = Path(m_input["inputs_dir"])
+        elif v.name == "reports":
+            host = Path(m_input["reports_dir"])
+        elif v.name == "cache":
+            host = Path.cwd() / "data" / "cache" / spec.id.replace(".", "_")
+        else:
+            # generic: workspace/<name>
+            host = Path(m_input["workspace_dir"]) / v.name
+
+        _ensure_dir(host)
+        cmd += ["-v", f"{str(host)}:{v.mountPath}"]
+        container_paths[v.name] = v.mountPath
+
+        # Special case: ZAP wants /zap/wrk mounted; reuse artifacts host dir
+        if v.mountPath == "/zap/wrk":
+            container_paths["artifacts"] = "/zap/wrk"
+
+    # Env
+    if spec.env:
+        for e in spec.env: cmd += ["-e", e]
+    cmd += ["-e", f"RUN_ID={m_input['run_id']}","-e", f"TARGET={m_input['target']}"]
+
+    # Image + command
+    cmd += [spec.image]
+    if spec.cmd: cmd += spec.cmd
+
+    # --- REWRITE PATHS for container ---
+    c_input = deepcopy(m_input)
+    # prefer explicit mounts; fall back to original if not present
+    c_input["artifacts_dir"] = container_paths.get("artifacts", c_input["artifacts_dir"])
+    c_input["workspace_dir"] = container_paths.get("workspace", c_input["workspace_dir"])
+    c_input["inputs_dir"]    = container_paths.get("inputs",    c_input["inputs_dir"])
+    c_input["reports_dir"]   = container_paths.get("reports",   c_input["reports_dir"])
 
     try:
         proc = subprocess.run(
-            [sys.executable, str(ep)],
-            input=json.dumps(payload, default=_json_default).encode("utf-8"),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=str(ep.parent),
-            timeout=timeout_sec or payload.get("config", {}).get("timeout_sec", 1800),
+            cmd,
+            input=json.dumps(c_input, default=_json_default).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=m_input.get("config", {}).get("timeout_sec", 1800)
         )
-        stdout = proc.stdout.decode("utf-8", "replace")
-        stderr = proc.stderr.decode("utf-8", "replace")
+        stdout = proc.stdout.decode("utf-8","replace")
+        stderr = proc.stderr.decode("utf-8","replace")
 
         if proc.returncode != 0:
-            return {
-                "status": "error",
-                "error": f"Module exited with code {proc.returncode}",
-                "stdout": stdout[-4000:],
-                "stderr": stderr[-4000:],
-                "started_at": started.isoformat(),
-                "ended_at": datetime.utcnow().isoformat(),
-                "module_entrypoint": str(ep),
-            }
+            return {"status":"error","error":f"docker exited {proc.returncode}",
+                    "stdout":stdout[-4000:],"stderr":stderr[-4000:],
+                    "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                    "module_entrypoint":f"docker://{spec.image}"}
 
+        data = json.loads(stdout or "{}")
+        data.setdefault("status","ok"); data.setdefault("findings",[]); data.setdefault("artifacts",[])
+        data.update({"started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                     "module_entrypoint":f"docker://{spec.image}"})
+        if stderr.strip(): data["stderr"] = stderr[-4000:]
+        return data
+    except subprocess.TimeoutExpired:
+        return {"status":"error","error":"docker module timed out",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                "module_entrypoint":f"docker://{spec.image}"}
+    except Exception as e:
+        return {"status":"error","error":f"docker exception: {e}",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                "module_entrypoint":f"docker://{spec.image}"}
+
+
+
+# -------- Process runner -----------------------------------------------------
+
+def _run_module_process(spec: ModuleSpec, m_input: Dict[str, Any]) -> Dict[str, Any]:
+    started = datetime.utcnow()
+    ep = _resolve_entrypoint(spec.entrypoint) if spec.entrypoint else None
+    if not ep or not ep.exists():
+        return {"status":"error","error":f"Entrypoint not found: {ep}",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat()}
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(ep)],
+            input=json.dumps(m_input, default=_json_default).encode("utf-8"),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(ep.parent),
+            timeout=m_input.get("config", {}).get("timeout_sec", 1800),
+        )
+        stdout = proc.stdout.decode("utf-8","replace")
+        stderr = proc.stderr.decode("utf-8","replace")
+        if proc.returncode != 0:
+            return {"status":"error","error":f"Module exited {proc.returncode}",
+                    "stdout":stdout[-4000:], "stderr":stderr[-4000:],
+                    "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                    "module_entrypoint":str(ep)}
         try:
             data = json.loads(stdout or "{}")
         except Exception as e:
-            return {
-                "status": "error",
-                "error": f"Module returned non-JSON stdout: {e}",
-                "stdout": stdout[-4000:],
-                "stderr": stderr[-4000:],
-                "started_at": started.isoformat(),
-                "ended_at": datetime.utcnow().isoformat(),
-                "module_entrypoint": str(ep),
-            }
-
-        data.setdefault("status", "ok")
-        data.setdefault("findings", [])
-        data.setdefault("artifacts", [])
-        data.update({
-            "started_at": started.isoformat(),
-            "ended_at": datetime.utcnow().isoformat(),
-            "module_entrypoint": str(ep),
-        })
-        if stderr.strip():
-            data["stderr"] = stderr[-4000:]
+            return {"status":"error","error":f"Non-JSON stdout: {e}",
+                    "stdout":stdout[-4000:], "stderr":stderr[-4000:],
+                    "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                    "module_entrypoint":str(ep)}
+        data.setdefault("status","ok"); data.setdefault("findings",[]); data.setdefault("artifacts",[])
+        data.update({"started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                     "module_entrypoint":str(ep)})
+        if stderr.strip(): data["stderr"] = stderr[-4000:]
         return data
-
     except subprocess.TimeoutExpired:
-        return {
-            "status": "error",
-            "error": "Module timed out",
-            "started_at": started.isoformat(),
-            "ended_at": datetime.utcnow().isoformat(),
-            "module_entrypoint": str(ep),
-        }
+        return {"status":"error","error":"Module timed out",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                "module_entrypoint":str(ep)}
     except Exception as e:
-        return {
-            "status": "error",
-            "error": f"Exception: {e}",
-            "started_at": started.isoformat(),
-            "ended_at": datetime.utcnow().isoformat(),
-            "module_entrypoint": str(ep),
-        }
+        return {"status":"error","error":f"Exception: {e}",
+                "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
+                "module_entrypoint":str(ep)}
 
-# ---------- Pipeline orchestration -------------------------------------------
+# -------- Orchestrator -------------------------------------------------------
 
-def run_pipeline(cfg: Any, module_paths: List[str]) -> Dict[str, Any]:
-    """
-    Supports both legacy and new config keys:
-      - workspace_dir OR workdir
-      - pipeline_name OR pipeline_id
-      - derives inputs/artifacts/reports if missing: data/runs/<run_id>/*
-    """
-    run_id        = _cfg_get(cfg, "run_id", "id")
-    target        = _cfg_get(cfg, "target")
-    pipeline_name = _cfg_get(cfg, "pipeline_name", "pipeline_id", default="pipeline")
+def run_pipeline(cfg: Any, module_specs_or_paths: List[Union[str, ModuleSpec]]) -> Dict[str, Any]:
+    def _get(k, d=None): return getattr(cfg,k, cfg.get(k,d) if isinstance(cfg,dict) else d)
 
-    # Base directory for derived paths
-    # Prefer explicit run_base/run_dir/base_dir if provided; else CWD/data/runs/<run_id>
-    explicit_base = _cfg_get(cfg, "run_base", "run_dir", "base_dir")
-    default_base  = Path.cwd() / "data" / "runs" / (run_id or "run")
-    base_dir      = Path(explicit_base) if explicit_base else default_base
+    run_id        = _get("run_id")
+    target        = _get("target")
+    pipeline_name = _get("pipeline_name", _get("pipeline_id","pipeline"))
+    base_dir      = Path.cwd() / "data" / "runs" / (run_id or "run")
 
-    # Accept workspace_dir OR workdir; default to base_dir/workspace
-    workspace_dir = _cfg_get(cfg, "workspace_dir", "workdir")
-    workspace_dir = Path(workspace_dir) if workspace_dir else (base_dir / "workspace")
+    workspace_dir = Path(_get("workspace_dir", _get("workdir", base_dir / "workspace")))
+    artifacts_dir = Path(_get("artifacts_dir", base_dir / "artifacts"))
+    inputs_dir    = Path(_get("inputs_dir", base_dir / "inputs"))
+    reports_dir   = Path(_get("reports_dir", base_dir / "reports"))
+    for p in (workspace_dir, artifacts_dir, inputs_dir, reports_dir): _ensure_dir(p)
 
-    # Others: accept explicit, else derive under base_dir
-    inputs_dir    = _cfg_get(cfg, "inputs_dir")
-    inputs_dir    = Path(inputs_dir) if inputs_dir else (base_dir / "inputs")
-
-    artifacts_dir = _cfg_get(cfg, "artifacts_dir")
-    artifacts_dir = Path(artifacts_dir) if artifacts_dir else (base_dir / "artifacts")
-
-    reports_dir   = _cfg_get(cfg, "reports_dir")
-    reports_dir   = Path(reports_dir) if reports_dir else (base_dir / "reports")
-
-    # Ensure dirs exist
-    for p in (workspace_dir, artifacts_dir, inputs_dir, reports_dir):
-        _ensure_dir(p)
-
-    modules_ids   = list(_cfg_get(cfg, "modules", default=[]))
-    extra_cfg     = dict(_cfg_get(cfg, "extra", default={}))
-    started       = datetime.utcnow()
+    started = datetime.utcnow()
     results: List[Dict[str, Any]] = []
-    previous_outputs: Dict[str, Any] = {}
+    prev: Dict[str, Any] = {}
 
-    # Pair ids with paths
-    pairs: List[Tuple[str, str]] = list(zip(modules_ids, module_paths))
+    # Normalize to ModuleSpec list
+    specs: List[ModuleSpec] = []
+    for item in module_specs_or_paths:
+        if isinstance(item, ModuleSpec):
+            specs.append(item); continue
+        # If a string, try ID first, else treat as path (process)
+        try:
+            specs.append(resolve_ids([item])[0])
+        except Exception:
+            specs.append(ModuleSpec(
+                id=item, name=item, entrypoint=str(_resolve_entrypoint(item)), runtime="process"
+            ))
 
-    for module_id, module_path in pairs:
-        m_config = extra_cfg.get(module_id, {})
-        payload = {
-            "run_id": run_id,
-            "target": target,
-            "workspace_dir": workspace_dir,
-            "artifacts_dir": artifacts_dir,
-            "inputs_dir": inputs_dir,
-            "reports_dir": reports_dir,
-            "previous_outputs": previous_outputs,
-            "config": m_config,
+    job_overrides = (_get("extra", {}) or {}).get("__runtime__", {})
+    for spec in specs:
+        override = job_overrides.get(spec.id, job_overrides.get("*"))
+        runtime = _decide_runtime(spec, override)
+        m_input = {
+            "run_id": run_id, "target": target,
+            "workspace_dir": workspace_dir, "artifacts_dir": artifacts_dir,
+            "inputs_dir": inputs_dir, "reports_dir": reports_dir,
+            "previous_outputs": prev, "config": {},
         }
-
-        res = run_module(module_path, payload, timeout_sec=m_config.get("timeout_sec"))
-        previous_outputs[module_id] = res
-        res.setdefault("module_id", module_id)
+        res = _run_module_docker(spec, m_input) if runtime == "docker" else _run_module_process(spec, m_input)
+        res.setdefault("module_id", spec.id)
+        prev[spec.id] = res
         results.append(res)
-
-        if res.get("status") == "error" and m_config.get("fail_fast", False):
+        if res.get("status") == "error" and m_input["config"].get("fail_fast"):
             break
 
     ended = datetime.utcnow()
-    return {
-        "run_id": run_id,
-        "pipeline_name": pipeline_name,
-        "started_at": started.isoformat(),
-        "ended_at": ended.isoformat(),
-        "results": results,
-    }
+    return {"run_id": run_id, "pipeline_name": pipeline_name,
+            "started_at": started.isoformat(), "ended_at": ended.isoformat(),
+            "results": results}
+
+
+def _decide_runtime(spec, job_override: str | None = None) -> str:
+    # precedence: job override > manifest.runtime > AUTO
+    if job_override:
+        return job_override.lower()
+    if (spec.runtime or "").lower() in ("docker", "process"):
+        return spec.runtime.lower()
+    return "docker" if spec.image else "process"

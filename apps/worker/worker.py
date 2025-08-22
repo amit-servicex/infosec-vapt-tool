@@ -78,13 +78,31 @@ class RunConfig(BaseModel):
 
 # --------------------------------------------------------------------
 # Worker loop
-# --------------------------------------------------------------------
+# ------------------------------------------------------------------
+
 def worker_loop(drain: bool = True) -> None:
     """
     Process jobs from the in-memory queue.
     - If drain=True, consume until queue is empty, then return.
     - If drain=False, keep running forever (daemon mode).
     """
+    import os, time, traceback
+    from datetime import datetime
+
+    VERBOSE = os.getenv("VAPT_VERBOSE", "").lower() in ("1", "true", "yes", "on")
+
+    def _tail_text(s: str, lines: int = 60) -> str:
+        if not s:
+            return ""
+        parts = s.splitlines()
+        return "\n".join(parts[-lines:])
+
+    def _fmt_dt(s: str) -> str:
+        try:
+            return datetime.fromisoformat(s).strftime("%H:%M:%S")
+        except Exception:
+            return s or "-"
+
     print(f"[worker] starting loop (drain={drain})")
     while True:
         job = _get_next_job()
@@ -127,8 +145,40 @@ def worker_loop(drain: bool = True) -> None:
 
             print("[worker] module_paths:", module_paths)
 
-            # Engine expects (cfg, modules)
+            # Execute pipeline
             result = run_pipeline(cfg, module_paths)
+
+            # --- NEW: print per-module diagnostics ---------------------------------
+            runs = result.get("results") or []
+            print(f"[worker] module run summary ({len(runs)} total):")
+            for idx, mr in enumerate(runs, start=1):
+                mid   = mr.get("module_id") or module_paths[idx-1] if idx-1 < len(module_paths) else "unknown"
+                stat  = mr.get("status") or "unknown"
+                start = _fmt_dt(mr.get("started_at", ""))
+                end   = _fmt_dt(mr.get("ended_at", ""))
+                print(f"  [{idx}/{len(runs)}] {mid} -> {stat} (start {start} end {end})")
+
+                # For errors: always print stdout/stderr tails to help debugging
+                # For success: print if VERBOSE is enabled or stderr exists
+                want_logs = (stat != "ok") or VERBOSE or bool(mr.get("stderr"))
+
+                if want_logs:
+                    stde = mr.get("stderr") or ""
+                    stdo = mr.get("stdout") or ""
+                    if stde:
+                        print(f"    ├─ stderr (tail):\n{_tail_text(stde)}")
+                    if stdo and (stat != "ok" or VERBOSE):
+                        print(f"    └─ stdout (tail):\n{_tail_text(stdo)}")
+
+                    # Surface any debug artifacts
+                    arts = mr.get("artifacts") or []
+                    for a in arts:
+                        ap = a.get("path") or ""
+                        desc = (a.get("description") or "").lower()
+                        if ap.endswith(".log") or "debug" in desc or "log" in desc:
+                            print(f"    · debug artifact: {ap}")
+
+            # -----------------------------------------------------------------------
 
             _persist_results(cfg, result)
             print(f"[worker] ✅ job {cfg.run_id} completed")
@@ -138,7 +188,6 @@ def worker_loop(drain: bool = True) -> None:
             traceback.print_exc()
         finally:
             QUEUE.task_done()
-
 
 
 def _persist_results(cfg: RunConfig, result: Any) -> None:

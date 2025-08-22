@@ -1,0 +1,11 @@
+id: report.html
+name: HTML Report Writer
+description: Consolidate findings to HTML (Docker)
+runtime: docker
+image: whz/vapt-report-html:0.1.0
+cmd: ["python","/app/main.py"]
+volumes:
+  - { name: reports,   mountPath: /reports }
+  - { name: workspace, mountPath: /workspace }
+workdir: /app
+network: bridge

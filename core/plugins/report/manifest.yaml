@@ -1,0 +1,8 @@
+id: report.html
+name: HTML Report Writer
+description: Consolidate findings to HTML
+capabilities: [report]
+runtime: process
+entrypoint: main.py
+volumes:
+  - { name: reports, mountPath: /reports }

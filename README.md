@@ -201,3 +201,8 @@ Run the tool (or stub)
 Save artifacts under workdir
 Print a valid ModuleOutput JSON to stdout
 Reference it in a pipeline under pipelines/*.yaml.
+
+
+docker build -t whz/vapt-zap:0.1.0     core/plugins/web/zap
+docker build -t whz/vapt-nuclei:0.1.0  core/plugins/web/nuclei
+docker build -t whz/vapt-report-html:0.1.0 core/reporting/report_module

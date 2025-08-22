@@ -1,8 +1,8 @@
 fastapi
 uvicorn
-pydantic
-pyyaml
 rich
 orjson
 requests
-core
+pydantic>=2.6
+PyYAML>=6.0
+Jinja2>=3.1

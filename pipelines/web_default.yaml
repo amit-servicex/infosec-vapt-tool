@@ -1,6 +1,9 @@
 name: web_default
-stages:
-  - template_scan:
-      - core/plugins/web/nuclei
-  - report:
-      - core/reporting/writers/html_writer.py
+modules:
+  - web.zap.baseline
+  - web.nuclei.basic
+  - report.html
+extra:
+  web.nuclei.basic:
+    args: "-follow-redirects -rate-limit 2000 -c 500 -timeout 10000"
+

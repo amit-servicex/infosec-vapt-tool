@@ -1,5 +1,15 @@
 id: web.nuclei.basic
 name: Nuclei Templates
-entrypoint: main.py
-description: Nuclei template scanning wrapper
-capabilities: [templates, web]
+runtime: docker
+image: whz/vapt-nuclei:0.1.10
+cmd: ["python","/app/main.py"]
+workdir: /app
+user: "1000:1000"
+env:
+  - "HOME=/cache"
+  - "XDG_CONFIG_HOME=/cache/.config"
+  - "NUCLEI_TEMPLATES=/cache/nuclei-templates"   # <— explicit template dir
+volumes:
+  - { name: artifacts, mountPath: /artifacts }
+  - { name: cache,     mountPath: /cache }
+resources: { cpu: "1", memory: "1g" }
