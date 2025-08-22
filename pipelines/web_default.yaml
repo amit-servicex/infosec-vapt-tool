@@ -1,0 +1,6 @@
+name: web_default
+stages:
+  - template_scan:
+      - core/plugins/web/nuclei
+  - report:
+      - core/reporting/writers/html_writer.py

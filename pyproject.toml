@@ -1,0 +1,3 @@
+[tool.vapt]
+name = "vapt"
+version = "0.1.0"

@@ -1,0 +1,11 @@
+id: web.zap
+version: "0.1.0"
+type: scan
+inputs:
+  - target_url
+outputs:
+  - artifacts: ["zap-baseline.json", "zap-full.json", "zap.html"]
+  - findings: true
+capabilities:
+  - passive
+  - active

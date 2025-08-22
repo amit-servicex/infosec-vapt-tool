@@ -1,0 +1,10 @@
+id: web.nuclei
+version: "0.1.0"
+type: scan
+inputs:
+  - targets_file
+outputs:
+  - artifacts: ["nuclei.json"]
+  - findings: true
+capabilities:
+  - templates
