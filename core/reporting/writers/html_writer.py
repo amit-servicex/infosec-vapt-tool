@@ -1,13 +1,15 @@
-def write(data, path):
-    html = f"""<!doctype html>
-<html><head><meta charset='utf-8'><title>VAPT Report</title>
-<style>body{{font-family:system-ui,Arial,sans-serif;margin:24px}} .sev{{padding:2px 6px;border-radius:6px}} .h{{background:#fee}} .m{{background:#ffe}} .l{{background:#efe}}</style>
-</head><body>
-<h1>VAPT Report</h1>
-<p>Total findings: {len(data.get('findings', []))}</p>
-<table border="1" cellspacing="0" cellpadding="6">
-<tr><th>Severity</th><th>Title</th><th>Location</th><th>Tool</th></tr>
-{''.join(f"<tr><td><span class='sev'>{f.get('severity','')}</span></td><td>{f.get('title','')}</td><td>{f.get('location','')}</td><td>{f.get('tool','')}</td></tr>" for f in data.get('findings', []))}
-</table>
-</body></html>"""
-    open(path, "w", encoding="utf-8").write(html)
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from pathlib import Path
+from collections import Counter
+
+def write_html(findings, template_dir: Path, out_path: Path, context=None):
+    env = Environment(
+        loader=FileSystemLoader(str(template_dir)),
+        autoescape=select_autoescape(["html", "xml"])
+    )
+    tpl = env.get_template("report.html.j2")
+    sev_counts = Counter([f.get("severity","info") for f in findings])
+    html = tpl.render(findings=findings, sev_counts=sev_counts, extra=(context or {}))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(html)
+    return out_path

@@ -3,6 +3,8 @@
 VAPT Product Scaffold — Architecture & Guide
 This repository is a modular VAPT engine you can run module-by-module today and chain into full pipelines later. It’s built to be plug-and-play, language-agnostic, and CI-friendly.
 Folder Tree (at a glance)
+export PYTHONPATH=/home/amitks/infosec-vapt-tool:$PYTHONPATH
+
 vapt/
 ├─ apps/                              # user-facing + orchestration services
 │  ├─ web-portal/                     # your admin UI (any framework)

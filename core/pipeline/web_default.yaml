@@ -1,0 +1,8 @@
+name: web_default
+modules:
+  - id: zap_baseline
+    uses: web.zap.baseline
+    with: {}
+  - id: nuclei_basic
+    uses: web.nuclei.basic
+    with: {}

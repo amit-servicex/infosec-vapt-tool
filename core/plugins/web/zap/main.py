@@ -1,33 +1,48 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-import argparse, json, pathlib, sys
+import json, os, subprocess, tempfile
+from pathlib import Path
+from datetime import datetime
+
+def parse_zap_baseline(report_html_path: Path):
+    # Minimal stub: produce one INFO finding noting the file exists
+    findings = []
+    if report_html_path.exists():
+        findings.append({
+            "id": "zap-baseline-report",
+            "title": "ZAP Baseline Report Generated",
+            "description": f"Report at {str(report_html_path)}",
+            "severity": "info",
+            "tool": "zap-baseline",
+        })
+    return findings
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stdin", action="store_true")
-    ap.add_argument("--input")
-    args = ap.parse_args()
+    m_input = json.loads(input())
+    target = m_input["target"]
+    art_dir = Path(m_input["artifacts_dir"])
+    art_dir.mkdir(parents=True, exist_ok=True)
+    out_html = art_dir / "zap-baseline.html"
 
-    payload = {}
-    if args.stdin:
-        payload = json.loads(sys.stdin.read())
-    elif args.input:
-        payload = json.loads(open(args.input, "r", encoding="utf-8").read())
+    # Try to run zap-baseline.py if available, else fallback to stub
+    try:
+        cmd = ["zap-baseline.py", "-t", target, "-r", str(out_html.name)]
+        subprocess.run(cmd, cwd=str(art_dir), check=True)
+    except Exception as e:
+        # dev mode if ZAP not installed yet
+        out_html.write_text("<html><body>Stub ZAP report</body></html>")
 
-    workdir = pathlib.Path(payload.get("workdir", "./data/runs/dev"))
-    workdir.mkdir(parents=True, exist_ok=True)
-    target = payload.get("inputs", {}).get("target_url", "https://example.com")
-
-    out_file = workdir / "zap-baseline.json"
-    out_file.write_text(json.dumps({"stub": True, "target": target}), encoding="utf-8")
-
-    result = {
+    findings = parse_zap_baseline(out_html)
+    payload = {
         "status": "ok",
-        "artifacts": [{"path": str(out_file), "description": "ZAP baseline (stub)", "content_type": "application/json"}],
-        "findings": [],
-        "stats": {}
+        "findings": findings,
+        "artifacts": [{
+            "path": str(out_html),
+            "type": "html",
+            "description": "ZAP Baseline HTML Report"
+        }],
+        "raw_output": None
     }
-    sys.stdout.write(json.dumps(result))
+    print(json.dumps(payload))
 
 if __name__ == "__main__":
     main()

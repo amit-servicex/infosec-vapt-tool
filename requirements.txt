@@ -5,3 +5,4 @@ pyyaml
 rich
 orjson
 requests
+core

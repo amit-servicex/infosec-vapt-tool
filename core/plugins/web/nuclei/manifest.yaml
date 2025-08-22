@@ -1,10 +1,5 @@
-id: web.nuclei
-version: "0.1.0"
-type: scan
-inputs:
-  - targets_file
-outputs:
-  - artifacts: ["nuclei.json"]
-  - findings: true
-capabilities:
-  - templates
+id: web.nuclei.basic
+name: Nuclei Templates
+entrypoint: main.py
+description: Nuclei template scanning wrapper
+capabilities: [templates, web]

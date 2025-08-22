@@ -1,31 +1,57 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-import argparse, json, pathlib, sys
+import json, subprocess, shutil
+from pathlib import Path
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stdin", action="store_true")
-    ap.add_argument("--input")
-    args = ap.parse_args()
+    m_input = json.loads(input())
+    target = m_input["target"]
+    art_dir = Path(m_input["artifacts_dir"])
+    art_dir.mkdir(parents=True, exist_ok=True)
+    out_json = art_dir / "nuclei.jsonl"
 
-    payload = {}
-    if args.stdin:
-        payload = json.loads(sys.stdin.read())
-    elif args.input:
-        payload = json.loads(open(args.input, "r", encoding="utf-8").read())
+    findings = []
 
-    workdir = pathlib.Path(payload.get("workdir", "./data/runs/dev"))
-    workdir.mkdir(parents=True, exist_ok=True)
+    nuclei = shutil.which("nuclei")
+    if nuclei:
+        cmd = [nuclei, "-u", target, "-json"]
+        with open(out_json, "w") as f:
+            subprocess.run(cmd, stdout=f, check=False)
+        # parse jsonl
+        for line in out_json.read_text().splitlines():
+            try:
+                obj = json.loads(line)
+                findings.append({
+                    "id": obj.get("template-id") or obj.get("templateID","nuclei-issue"),
+                    "title": obj.get("info",{}).get("name","Nuclei finding"),
+                    "description": obj.get("matcher-name",""),
+                    "severity": obj.get("info",{}).get("severity","info"),
+                    "location": obj.get("host"),
+                    "tags": obj.get("info",{}).get("tags",[]),
+                    "tool": "nuclei",
+                })
+            except Exception:
+                continue
+    else:
+        # dev stub
+        out_json.write_text("")
+        findings.append({
+            "id": "nuclei-stub",
+            "title": "Nuclei not installed",
+            "description": "Running in stub mode.",
+            "severity": "info",
+            "tool": "nuclei"
+        })
 
-    out_file = workdir / "nuclei.json"
-    out_file.write_text(json.dumps({"stub": True}), encoding="utf-8")
-
-    sys.stdout.write(json.dumps({
+    payload = {
         "status": "ok",
-        "artifacts": [{"path": str(out_file), "description": "Nuclei output (stub)", "content_type": "application/json"}],
-        "findings": [],
-        "stats": {}
-    }))
+        "findings": findings,
+        "artifacts": [{
+            "path": str(out_json),
+            "type": "json",
+            "description": "Nuclei raw output (JSONL)"
+        }],
+    }
+    print(json.dumps(payload))
 
 if __name__ == "__main__":
     main()

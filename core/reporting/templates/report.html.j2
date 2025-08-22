@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>VAPT Findings Report</title>
+  <style>
+    body{font-family:ui-sans-serif,system-ui,Arial;margin:24px;}
+    .sev{padding:2px 8px;border-radius:12px;font-size:12px}
+    .sev.critical{background:#8b0000;color:#fff}
+    .sev.high{background:#c0392b;color:#fff}
+    .sev.medium{background:#f39c12;color:#111}
+    .sev.low{background:#2ecc71;color:#111}
+    .sev.info{background:#3498db;color:#fff}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #ddd;padding:8px}
+    th{background:#f6f6f6;text-align:left}
+  </style>
+</head>
+<body>
+  <h1>Findings Report</h1>
+  <h3>Severity Summary</h3>
+  <ul>
+    <li>Critical: {{ sev_counts.get('critical',0) }}</li>
+    <li>High: {{ sev_counts.get('high',0) }}</li>
+    <li>Medium: {{ sev_counts.get('medium',0) }}</li>
+    <li>Low: {{ sev_counts.get('low',0) }}</li>
+    <li>Info: {{ sev_counts.get('info',0) }}</li>
+  </ul>
+
+  <h3>Findings</h3>
+  <table>
+    <thead>
+      <tr><th>Severity</th><th>Title</th><th>Tool</th><th>Location</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      {% for f in findings %}
+      <tr>
+        <td><span class="sev {{f.severity}}">{{f.severity}}</span></td>
+        <td>{{f.title}}</td>
+        <td>{{f.tool or ''}}</td>
+        <td>{{f.location or ''}}</td>
+        <td>{{f.description or ''}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
