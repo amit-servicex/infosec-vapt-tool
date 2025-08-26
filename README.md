@@ -206,3 +206,117 @@ Reference it in a pipeline under pipelines/*.yaml.
 docker build -t whz/vapt-zap:0.1.0     core/plugins/web/zap
 docker build -t whz/vapt-nuclei:0.1.0  core/plugins/web/nuclei
 docker build -t whz/vapt-report-html:0.1.0 core/reporting/report_module
+
+
+Week 1 Progress Overview:
+
+Core Engine & Pipeline Setup:
+
+Core Engine Configuration: Set up the core pipeline engine using RunConfig, ModuleInput/Output, Finding, Artifact, and ModuleResult in core/pipeline/contracts.py. Configured a sequential pipeline engine in core/pipeline/engine.py for processing jobs.
+
+Plugin Registration & Discovery:
+
+Dynamic Module Discovery: Implemented dynamic module discovery in core/pipeline/registry.py using manifest.yaml. This allows automatic registration and discovery of plugins located in core/plugins/**/manifest.yaml.
+
+Job Queueing Setup:
+
+In-memory Queue: Set up a basic job queueing system for worker execution, using an in-memory store for the initial version. A more robust solution (like Redis) is planned for future updates.
+
+ZAP Baseline Integration:
+
+ZAP Baseline Scan: Integrated the ZAP baseline scan for passive scanning. The wrapper was created, and the ZAP tool can be triggered via the CLI. After installing ZAP (docker or local), it generates real findings.
+
+Nuclei Integration:
+
+Nuclei Template Scanning: Integrated Nuclei for automated vulnerability scanning with templates. The Nuclei module was created, and it correctly parses the jsonl files, running against multiple templates.
+
+Basic Reporting:
+
+HTML Reporting: Implemented an HTML report generation system. The report is generated from findings, but the initial issue was that the findings were not being correctly captured in the HTML output.
+
+Current Issue:
+
+Currently, the Nuclei scan results are being generated but not properly reflected in the HTML report. Here’s a breakdown of the problem:
+
+Nuclei Scan Output: The Nuclei module (web.nuclei.basic) runs successfully, and the findings are stored in a nuclei.jsonl file. However, the HTML report generation module (report.html) is not capturing these findings correctly and not displaying them in the generated HTML report.
+
+Debugging Logs:
+
+Nuclei runs without errors but reports no findings in its output.
+
+The findings in the JSON file are empty, likely because Nuclei doesn’t find any vulnerabilities based on the current templates and target URL.
+
+Potential Reasons:
+
+Nuclei Templates: The templates used for scanning may not be sufficient or aligned with the target, resulting in no findings. The templates may need to be expanded, or more targeted templates should be used for the specific URL.
+
+Pipeline Configuration: There could be a configuration issue in the pipeline setup where the Nuclei findings are not properly fed into the report generation system. The report.html module might not be processing the nuclei.jsonl file correctly.
+
+Permissions/Write Path: There may be permission issues, particularly related to the Docker container's ability to write to the artifacts directory, preventing findings from being captured or displayed.
+
+Proposed Solution:
+
+Check Nuclei Findings:
+
+Verify that the nuclei.jsonl file is being populated with valid findings and that Nuclei is properly scanning the URL. You can manually test the scanning by running the Nuclei tool outside the pipeline with specific templates and checking the output.
+
+Validate Report Generation:
+
+Ensure the main.py script is correctly handling the findings from nuclei.jsonl and generating the HTML report. If necessary, add debug logs to confirm the content of nuclei.jsonl and see how it’s processed for the HTML output.
+
+Review Template Selection:
+
+Check the Nuclei template set being used and ensure it covers the vulnerabilities relevant to the target site. You may need to modify the pipeline configuration to include high-signal templates, such as those targeting misconfigurations, common vulnerabilities, or outdated software.
+
+Ensure Correct Permissions:
+
+Confirm that Docker has write permissions for the artifacts directory (/artifacts), and that Nuclei’s output files are correctly placed in this directory.
+
+Once these steps are followed, you should be able to see the findings in the HTML report generated at /artifacts/report.html. If the issue persists, more detailed logs or template adjustments might be required. Let me know if you need further guidance!
+
+
+
+
+Week-2 · Day-8 — ZAP Full Scan + Debugging (Testfire)
+
+Date: 2025-08-26
+Scope: Enable ZAP active scanning, add rich debug logs, and verify runs against https://testfire.net.
+Outputs: HTML/JSON reports + normalized findings + streaming debug log.
+
+What changed (Changelog)
+
+core/plugins/web/zap/main.py
+
+Added mode: "full" support (kept baseline intact).
+
+Docker fallback now defaults to ghcr.io/zaproxy/zaproxy:stable.
+
+New debug log at artifacts/zap-debug.log (heartbeat + full command).
+
+Hard timeout guard (derived from max_duration_min).
+
+Normalized findings saved to workspace/zap/findings.json.
+
+New inputs:
+
+ajax_spider: bool
+
+max_duration_min: int
+
+risk_threshold: "informational"|"low"|"medium"|"high"
+
+include_patterns: string[]
+
+exclude_patterns: string[]
+
+debug: bool (adds -d to wrapper)
+
+extra_zap: string[] (optional, extra -z configs to ZAP)
+
+Environment switches
+
+ZAP_DOCKER_IMAGE (default: ghcr.io/zaproxy/zaproxy:stable)
+
+ZAP_DOCKER_EXTRA_ARGS (e.g., --network host, or host gateway mapping)
+
+Directory layout (per run)

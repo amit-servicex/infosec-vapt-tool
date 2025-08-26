@@ -1,16 +1,17 @@
-id: web.zap.baseline
-name: ZAP Baseline (Passive)
-description: OWASP ZAP baseline wrapper (Docker)
-capabilities: [passive, web]
-runtime: docker
-image: whz/vapt-zap:0.1.0
-cmd: ["python3","/app/main.py"]
-workdir: /zap/wrk                 # ZAP expects outputs here
-user: "1000:1000"
-env:
-  - "JAVA_TOOL_OPTIONS=-Xmx1024m"
-  - ZAP_WORK=/zap/wrk
-volumes:
-  - { name: artifacts, mountPath: /zap/wrk }   # critical: artifacts -> /zap/wrk
-  - { name: workspace, mountPath: /workspace }
-resources: { cpu: "1", memory: "2g" }
+id: web.zap_full
+version: "0.1.0"
+type: scan
+inputs:
+  - target_url
+  - include_patterns?     # list[str] - regex includes
+  - exclude_patterns?     # list[str] - regex excludes
+  - policy?               # string or path to configs/policies/zap-active-policy.yaml
+  - context_file?         # optional: path to a prebuilt ZAP context file
+  - auth?                 # { type: "form|http", username, password, login_url?, username_field?, password_field?, extra? }
+  - ajax_spider?          # bool
+  - max_duration_min?     # int - hard budget
+  - risk_threshold?       # "informational|low|medium|high" for filtering emitted findings
+outputs:
+  - artifacts: ["zap-full.json", "zap-report.html", "zap.log"]
+  - findings: true
+capabilities: [ active, web ]
