@@ -177,13 +177,37 @@ def _harvest_urls(artifacts_dir: Path, target: str, log):
         log(f"[wrapper] WARN: could not write urls.txt: {ex}")
     return out, len(urls)
 
+
+import sys, json
+
+def _merge_target_into_inputs(inputs: dict, target: str | None) -> dict:
+    inputs = dict(inputs or {})
+    if target and "target_url" not in inputs:
+        inputs["target_url"] = target
+    return inputs
+
+def _adapt_engine_input(m: dict) -> dict:
+    # If already in plugin shape (manual runs), return as-is
+    if "inputs" in m or "workdir" in m:
+        return m
+    # Adapt engine ModuleInput -> plugin's expected shape
+    return {
+        "run_id": m.get("run_id"),
+        "workdir": m.get("workspace_dir"),
+        "artifacts_dir": m.get("artifacts_dir"),
+        "inputs": _merge_target_into_inputs(m.get("config") or {}, m.get("target")),
+        "previous_outputs": m.get("previous_outputs") or {},
+    }
+
 # ---------- main ----------
 
 def main():
     started_at = datetime.datetime.utcnow().isoformat()
 
     # Read module input JSON from stdin (engine provides it)
-    raw = sys.stdin.read()
+    #raw = sys.stdin.read()
+    raw = json.loads(sys.stdin.read() or "{}")
+    m_input = _adapt_engine_input(raw)
     try:
         mod_in = json.loads(raw) if raw.strip() else {}
     except Exception as ex:

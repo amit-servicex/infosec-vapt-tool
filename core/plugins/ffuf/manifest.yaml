@@ -1,0 +1,70 @@
+id: web.ffuf
+name: "FFUF parameter fuzzing"
+version: "0.1.0"
+description: "Discover parameters & anomalies via ffuf (sniper/clusterbomb) and emit normalized findings for aggregator/sqlmap."
+entrypoint: "core/plugins/web/ffuf/main.py"
+env:
+  FFUF_DOCKER_IMAGE: "secsi/ffuf:2.0.0"
+inputs:
+  # High-level inputs expected in ModuleInput.inputs
+  base_urls:
+    type: array
+    items: string
+    required: false
+    description: "Seed URLs when no candidates are supplied."
+  candidates_from:
+    type: array
+    items: string
+    required: false
+    description: "Sources: ['zap','nuclei'] to parse existing findings for params."
+  candidates:
+    type: array
+    required: false
+    description: "Explicit candidates. Each item may be a URL or an object {method,url,body}."
+  wordlists:
+    type: array
+    items: string
+    required: false
+    description: "Paths to wordlists. If omitted, uses configs/wordlists/quick.txt"
+  attack:
+    type: string
+    enum: ["sniper","clusterbomb"]
+    default: "sniper"
+  rate:
+    type: integer
+    default: 300
+  threads:
+    type: integer
+    default: 40
+  timeout_sec:
+    type: integer
+    default: 10
+  max_targets:
+    type: integer
+    default: 200
+  filters:
+    type: array
+    items: string
+    required: false
+    description: "Raw ffuf filter args e.g. ['-fc', '404', '-fs', '0']"
+  matchers:
+    type: array
+    items: string
+    required: false
+    description: "Raw ffuf matcher args e.g. ['-mc', '200']"
+  detect_reflection:
+    type: boolean
+    default: true
+  extra_args:
+    type: array
+    items: string
+    required: false
+  config_file:
+    type: string
+    required: false
+artifacts:
+  - "artifacts/ffuf-debug.log"
+  - "artifacts/ffuf-*.json"
+  - "workspace/ffuf/findings.json"
+requires:
+  - "python3"

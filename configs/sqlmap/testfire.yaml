@@ -1,0 +1,13 @@
+candidates_from: ["zap","nuclei"]
+risk: 1
+level: 1
+timeout_per_target_sec: 240
+max_targets: 15
+docker_image: "sqlmapproject/sqlmap"
+# optional refinements:
+# dbms: "MySQL,PostgreSQL"
+# tamper: "between"
+# extra_args:
+#   - "--fresh-queries"
+#   - "--time-sec=3"
+# target_host_filter: "testfire\\.net"

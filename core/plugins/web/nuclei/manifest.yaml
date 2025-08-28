@@ -1,5 +1,8 @@
 id: web.nuclei.basic
 name: Nuclei Templates
+description: "Nuclei templates scan"
+capabilities: [passive, web]
+entrypoint: main.py
 runtime: docker
 image: whz/vapt-nuclei:0.1.10
 cmd: ["python","/app/main.py"]

@@ -1,0 +1,29 @@
+id: web.sqlmap
+version: "0.2.0"
+ame: SQLMap Confirmation
+description: "Confirm suspected SQL injection findings via sqlmap."
+type: scan
+entrypoint: main.py
+capabilities: [confirm, web, sqli]
+
+inputs:
+  - candidates?
+  - candidates_from?
+  - target_host_filter?
+  - profile?
+  - allow_deep?
+  - risk?
+  - level?
+  - technique?
+  - time_sec?
+  - threads?
+  - timeout_per_target_sec?
+  - max_targets?
+  - extra_args?
+  - discovery?
+  - config_file?
+  - docker_image?
+outputs:
+  - artifacts: ["sqlmap-summary.json", "sqlmap-*.log", "sqlmap-debug.log"]
+  - findings: true
+capabilities: [ confirm, web, sqli ]

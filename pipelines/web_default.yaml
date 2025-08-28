@@ -1,9 +1,100 @@
-name: web_default
-modules:
-  - web.zap.baseline
-  - web.nuclei.basic
-  - report.html
-extra:
-  web.nuclei.basic:
-    args: "-follow-redirects -rate-limit 2000 -c 500 -timeout 10000"
+# current name: web_default
+# modules:
+#   - web.zap
+#   - web.nuclei.basic
+#   - web.sqlmap     # fallback pass
+#   - report.html
 
+# extra:
+#   web.zap:
+#     web.zap:
+#     with:
+#       mode: full
+#       ajax_spider: true             # enable AJAX spider (headless browser)
+#       max_duration_min: 10          # = 600 seconds
+#       risk_threshold: low
+#       debug: true
+#       extra_zap:
+#         - "-config spiderAjax.browserId=0"    # headless browser
+#         - "-config spider.maxDepth=10"        # crawl depth
+#         - "-config spider.maxChildren=4000"   # breadth
+#         - "-config ascan.scanOnlyInScope=true"
+#         - "-config ascan.maxRuleDurationInMins=5"
+
+#   web.nuclei.basic:
+#     args: "-follow-redirects -rate-limit 2000 -c 500 -timeout 10000 -tags sqli"
+
+#   # Main confirmation pass (suspects only)
+#   web.sqlmap:
+#     with:
+#       candidates_from: ["zap","nuclei"]
+#       target_host_filter: "testfire\\.net"
+#       profile: standard
+#       allow_deep: true
+#       timeout_per_target_sec: 3600
+#       max_targets: 20
+
+current name: web_default
+modules:
+  - web.zap
+  - web.nuclei.basic
+  - web.ffuf 
+  - web.sqlmap
+  - report.html
+
+extra:
+  web.zap:
+    with:
+      mode: full
+      ajax_spider: true
+      max_duration_min: 15
+      risk_threshold: low
+      debug: true
+      include_patterns:
+        - "http://testphp.vulnweb.com/.*"
+      exclude_patterns:
+        - "http://testphp.vulnweb.com/(images|static|css|js)/.*"
+      extra_zap:
+        - "-config spiderAjax.browserId=0"
+        - "-config spider.maxDepth=10"
+        - "-config spider.maxChildren=4000"
+        - "-config ascan.scanOnlyInScope=true"
+        - "-config ascan.maxRuleDurationInMins=5"
+
+  web.nuclei.basic:
+    args: >
+      -follow-redirects
+      -severity medium,high,critical
+      -tags sqli,xss,cve,ssrf,rce,auth,exposure
+      -rate-limit 1500
+      -c 200
+      -timeout 15000
+      -retries 1
+      -project
+      -stats
+  
+  web.ffuf:
+    with:
+      candidates_from: ["zap","nuclei"]
+      wordlists: ["configs/wordlists/quick.txt"]
+      attack: sniper
+      rate: 100
+      threads: 20
+      timeout_sec: 20
+      filters: []
+      matchers: ["-mc","200,302,401,403,500"]
+      extra_docker_args: ["--network","host"]
+
+  web.sqlmap:
+    with:
+      candidates_from: ["zap","nuclei","file"]     # now supported by code
+      candidates_file: "/artifacts/urls.txt"       # code filters param URLs
+      param_url_regex: "\\?.+=.+"                  # default; explicit for clarity
+      auto_promote_param_urls: true                # also scan /artifacts/urls.txt if none
+      target_host_filter: "testphp\\.vulnweb\\.com"
+      profile: standard
+      allow_deep: true
+      timeout_per_target_sec: 3600
+      max_targets: 30
+      risk: 3
+      level: 5

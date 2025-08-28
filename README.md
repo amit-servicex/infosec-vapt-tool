@@ -320,3 +320,15 @@ ZAP_DOCKER_IMAGE (default: ghcr.io/zaproxy/zaproxy:stable)
 ZAP_DOCKER_EXTRA_ARGS (e.g., --network host, or host gateway mapping)
 
 Directory layout (per run)
+
+
+
+ Use official ZAP image on GHCR
+export ZAP_DOCKER_IMAGE="ghcr.io/zaproxy/zaproxy:stable"
+
+# If scanning services on your Linux localhost (lets ZAP reach 127.0.0.1)
+# (Comment this out when not needed.)
+export ZAP_DOCKER_EXTRA_ARGS="--network host"
+
+# Optional: surface verbose wrapper logs in our module
+export DEBUG_ZAP=1

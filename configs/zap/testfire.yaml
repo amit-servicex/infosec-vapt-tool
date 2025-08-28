@@ -1,0 +1,11 @@
+target_url: "https://testfire.net"
+mode: "full"
+ajax_spider: false
+max_duration_min: 12
+risk_threshold: "low"
+include_patterns:
+  - "https://testfire.net/.*"
+extra_zap_file: "configs/zap/extra-zap.conf"
+docker_image: "ghcr.io/zaproxy/zaproxy:stable"
+# docker_extra_args: ["--network", "host"]   # if you need host net
+debug: true

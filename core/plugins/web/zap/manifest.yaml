@@ -1,17 +1,23 @@
-id: web.zap_full
-version: "0.1.0"
+id: web.zap
+version: "0.3.0"
 type: scan
+capabilities: [passive, active, web]
+entrypoint: main.py
 inputs:
-  - target_url
-  - include_patterns?     # list[str] - regex includes
-  - exclude_patterns?     # list[str] - regex excludes
-  - policy?               # string or path to configs/policies/zap-active-policy.yaml
-  - context_file?         # optional: path to a prebuilt ZAP context file
-  - auth?                 # { type: "form|http", username, password, login_url?, username_field?, password_field?, extra? }
-  - ajax_spider?          # bool
-  - max_duration_min?     # int - hard budget
-  - risk_threshold?       # "informational|low|medium|high" for filtering emitted findings
+  - target_url?           # direct target (optional if you use config_file)
+  - mode?                 # "baseline" | "full"
+  - ajax_spider?
+  - max_duration_min?
+  - risk_threshold?
+  - include_patterns?
+  - exclude_patterns?
+  - debug?
+  - extra_zap?            # list of "-config ..." strings
+  - config_file?          # NEW: YAML/JSON file with the above keys
+  - extra_zap_file?       # NEW: one "-config ..." per line
+  - docker_image?         # override image if needed
+  - docker_extra_args?    # e.g. ["--network", "host"]
 outputs:
-  - artifacts: ["zap-full.json", "zap-report.html", "zap.log"]
+  - artifacts: ["zap-*.html", "zap-*.json", "zap-debug.log"]
   - findings: true
-capabilities: [ active, web ]
+capabilities: [ passive, active, web ]

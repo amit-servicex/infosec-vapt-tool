@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# pass stdin/args straight through to the python plugin
+exec python core/plugins/web/sqlmap/main.py "$@"
