@@ -2,6 +2,7 @@
 # core/plugins/web/nuclei/main.py
 import os
 import sys
+import io
 import json
 import shlex
 import re
@@ -10,15 +11,15 @@ import subprocess
 from pathlib import Path
 from urllib.parse import urlparse
 
-# ---------- small helpers ----------
+# ----------------- tiny io helpers -----------------
 
-def _eprint(*a): print(*a, file=sys.stderr, flush=True)
+def _eprint(*a):
+    print(*a, file=sys.stderr, flush=True)
 
-def _json_out(payload: dict):
-    """Emit the module's JSON result on stdout."""
+def _json_out(payload: dict, code: int = 0):
+    """Emit JSON to stdout for the engine; exit with given code (0 even on error so artifacts persist)."""
     print(json.dumps(payload))
-    # status != ok should still exit 0 so the engine can persist artifacts
-    sys.exit(0)
+    sys.exit(code)
 
 def _safe_iterdir(p: Path):
     try:
@@ -29,17 +30,19 @@ def _safe_iterdir(p: Path):
 def _has_content(p: Path) -> bool:
     return bool(_safe_iterdir(p))
 
+# ----------------- arg normalizer ------------------
+
 def _normalize_extra_args(extra_args: str):
-    """Allow -timeout 10s by converting to -timeout 10 (nuclei expects numeric seconds)."""
+    """Allow '-timeout 10s' by converting to '-timeout 10' (nuclei expects numeric seconds)."""
     toks = shlex.split(extra_args or "")
     for i, t in enumerate(toks):
         if t in ("-timeout", "-tmo") and i + 1 < len(toks):
-            m = re.fullmatch(r"(\d+)[sS]", toks[i+1])
+            m = re.fullmatch(r"(\d+)[sS]", toks[i + 1])
             if m:
-                toks[i+1] = m.group(1)
+                toks[i + 1] = m.group(1)
     return toks
 
-# ---------- templates management (no /root access) ----------
+# ----------------- templates -----------------------
 
 def _count_templates(templates_dir: Path, log) -> int:
     try:
@@ -48,7 +51,8 @@ def _count_templates(templates_dir: Path, log) -> int:
             capture_output=True, text=True, check=False
         )
         if p.returncode != 0:
-            if p.stderr: log(f"[wrapper] nuclei -tl stderr:\n{p.stderr}")
+            if p.stderr:
+                log(f"[wrapper] nuclei -tl stderr:\n{p.stderr}")
             return 0
         return len([ln for ln in p.stdout.splitlines() if ln.strip()])
     except Exception as ex:
@@ -56,61 +60,42 @@ def _count_templates(templates_dir: Path, log) -> int:
         return 0
 
 def _ensure_templates(templates_dir: Path, cache_dir: Path, log):
-    """
-    Ensure templates live under a WRITABLE dir (templates_dir).
-    Strategy:
-      1) Make sure dirs exist; set HOME and XDG_CONFIG_HOME into cache_dir.
-      2) Run `nuclei -update-templates` (it honors HOME/NUCLEI_TEMPLATES).
-      3) If still empty, optional best-effort ZIP fallback when curl+unzip exist.
-    """
+    import urllib.request, zipfile, shutil
     templates_dir.mkdir(parents=True, exist_ok=True)
-
-    # Step 1: update-templates (uses HOME/NUCLEI_TEMPLATES)
-    log("[wrapper] templates check: running nuclei -update-templates …")
-    up = subprocess.run(["nuclei", "-update-templates"], capture_output=True, text=True)
-    if up.stdout: log(up.stdout.strip())
-    if up.stderr: log(up.stderr.strip())
-
-    cnt = _count_templates(templates_dir, log)
-    if cnt > 0:
-        log(f"[wrapper] templates available after update: {cnt}")
+    if any(templates_dir.iterdir()):
+        log(f"[wrapper] templates already present at {templates_dir}")
         return
+    archive = os.getenv(
+        "NUCLEI_TPL_ARCHIVE",
+        "https://github.com/projectdiscovery/nuclei-templates/archive/refs/heads/main.zip"
+    )
+    try:
+        log(f"[wrapper] downloading nuclei-templates zip …")
+        with urllib.request.urlopen(archive, timeout=120) as resp:
+            zdata = io.BytesIO(resp.read())
+        with zipfile.ZipFile(zdata) as zf:
+            # find top-level dir in archive
+            top = next((n.split("/", 1)[0] for n in zf.namelist() if "/" in n), "")
+            tmp_extract = cache_dir / "_tpl_extract"
+            shutil.rmtree(tmp_extract, ignore_errors=True)
+            tmp_extract.mkdir(parents=True, exist_ok=True)
+            zf.extractall(tmp_extract)
+        src = tmp_extract / top if top else tmp_extract
+        if src.exists():
+            for item in src.iterdir():
+                dst = templates_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dst)
+        log(f"[wrapper] templates ready at {templates_dir}")
+    except Exception as ex:
+        log(f"[wrapper] WARNING: Python fallback failed to fetch templates: {ex}")
 
-    # Step 2 (optional): fallback download if tools exist
-    curl = subprocess.run(["/bin/sh", "-lc", "command -v curl >/dev/null 2>&1"], capture_output=True)
-    unzip = subprocess.run(["/bin/sh", "-lc", "command -v unzip >/dev/null 2>&1"], capture_output=True)
-    if curl.returncode == 0 and unzip.returncode == 0:
-        log("[wrapper] templates still empty; trying archive fallback download …")
-        archive = os.getenv(
-            "NUCLEI_TPL_ARCHIVE",
-            "https://github.com/projectdiscovery/nuclei-templates/archive/refs/heads/main.zip"
-        )
-        cmd = (
-            f'curl -fsSL "{archive}" -o /tmp/ntpl.zip && '
-            f'unzip -q /tmp/ntpl.zip -d /tmp && '
-            f'src="$(ls -d /tmp/nuclei-templates-* | head -n1)" && '
-            f'cp -a "$src/." "{templates_dir}/" || true'
-        )
-        dl = subprocess.run(["/bin/sh", "-lc", cmd], capture_output=True, text=True)
-        if dl.stdout: log(dl.stdout.strip())
-        if dl.stderr: log(dl.stderr.strip())
-        cnt = _count_templates(templates_dir, log)
-        log(f"[wrapper] templates after fallback: {cnt}")
-    else:
-        log("[wrapper] WARNING: curl/unzip not available for fallback; proceeding without.")
-
-# ---------- URL harvesting ----------
+# ----------------- url harvesting ------------------
 
 def _harvest_urls(artifacts_dir: Path, target: str, log):
-    """
-    Build a seed list of URLs for nuclei:
-      1) Use existing /artifacts/urls.txt if present.
-      2) Try ZAP baseline JSON for discovered URLs.
-      3) Seed a few common paths under the target.
-    """
     urls = set()
-
-    # (1) pre-supplied list
     pre = artifacts_dir / "urls.txt"
     if pre.exists():
         try:
@@ -122,7 +107,6 @@ def _harvest_urls(artifacts_dir: Path, target: str, log):
         except Exception as ex:
             log(f"[wrapper] WARN: could not read urls.txt: {ex}")
 
-    # (2) ZAP outputs
     if not urls:
         for cand in ("zap-baseline.json", "zap-baseline-raw.json", "zap.json"):
             p = artifacts_dir / cand
@@ -132,25 +116,20 @@ def _harvest_urls(artifacts_dir: Path, target: str, log):
                 data = json.loads(p.read_text(encoding="utf-8"))
             except Exception:
                 continue
-
-            # ZAP "site[].alerts[].instances[].uri"
+            # zap-like structures
             for s in data.get("site") or []:
                 for a in s.get("alerts") or []:
                     for i in a.get("instances") or []:
                         u = (i.get("uri") or "").strip()
                         if u.startswith("http"):
                             urls.add(u)
-
-            # Some wrappers add a top-level urls[]
             for u in data.get("urls") or []:
                 if isinstance(u, str) and u.startswith("http"):
                     urls.add(u)
-
             if urls:
                 log(f"[wrapper] harvested {len(urls)} urls from {p.name}")
                 break
 
-    # (3) fallback seeds
     if not urls and target:
         base = target.rstrip("/")
         try:
@@ -177,8 +156,7 @@ def _harvest_urls(artifacts_dir: Path, target: str, log):
         log(f"[wrapper] WARN: could not write urls.txt: {ex}")
     return out, len(urls)
 
-
-import sys, json
+# ----------------- input adapter -------------------
 
 def _merge_target_into_inputs(inputs: dict, target: str | None) -> dict:
     inputs = dict(inputs or {})
@@ -187,10 +165,9 @@ def _merge_target_into_inputs(inputs: dict, target: str | None) -> dict:
     return inputs
 
 def _adapt_engine_input(m: dict) -> dict:
-    # If already in plugin shape (manual runs), return as-is
+    """Accept engine ModuleInput or simple {"target": "..."} and return a uniform shape."""
     if "inputs" in m or "workdir" in m:
         return m
-    # Adapt engine ModuleInput -> plugin's expected shape
     return {
         "run_id": m.get("run_id"),
         "workdir": m.get("workspace_dir"),
@@ -199,44 +176,115 @@ def _adapt_engine_input(m: dict) -> dict:
         "previous_outputs": m.get("previous_outputs") or {},
     }
 
-# ---------- main ----------
+# ----------------- dir picking ---------------------
+
+def _first_writable_dir(candidates):
+    for c in candidates:
+        if not c:
+            continue
+        try:
+            p = Path(c)
+            p.mkdir(parents=True, exist_ok=True)
+            test = p / ".touch"
+            with test.open("w") as fh:
+                fh.write("ok")
+            test.unlink(missing_ok=True)
+            return p
+        except Exception:
+            continue
+    # final fallback
+    p = Path("/tmp/nuclei_fallback")
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+# ----------------- main ----------------------------
 
 def main():
-    started_at = datetime.datetime.utcnow().isoformat()
+    # timezone-aware timestamp (fixes DeprecationWarning)
+    #started_at = datetime.datetime.now(datetime.UTC).isoformat()
+    started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-    # Read module input JSON from stdin (engine provides it)
-    #raw = sys.stdin.read()
-    raw = json.loads(sys.stdin.read() or "{}")
-    m_input = _adapt_engine_input(raw)
+    # stdin → json → adapt
+    raw = sys.stdin.read() or "{}"
     try:
-        mod_in = json.loads(raw) if raw.strip() else {}
+        mod_in = json.loads(raw)
+        mod_in = _adapt_engine_input(mod_in)
     except Exception as ex:
-        _eprint(f"[wrapper] WARN: failed to parse stdin as JSON: {ex}")
+        _eprint(f"[wrapper] WARN: failed to parse/adapt stdin JSON: {ex}")
         mod_in = {}
 
-    # Resolve paths / env (MUST be writable)
-    artifacts_dir = Path(os.getenv("ARTIFACTS_DIR") or mod_in.get("artifacts_dir") or "/artifacts")
-    cache_dir     = Path(os.getenv("CACHE_DIR")     or mod_in.get("cache_dir")     or "/cache")
-    templates_dir = Path(os.getenv("NUCLEI_TEMPLATES") or str(cache_dir / "nuclei-templates"))
-    xdg_cfg       = Path(os.getenv("XDG_CONFIG_HOME") or str(cache_dir / ".config"))
+    # dirs (pick truly writable artifacts first; avoid /artifacts if not writable)
+    requested_artifacts = [
+        os.getenv("ARTIFACTS_DIR"),
+        mod_in.get("artifacts_dir"),
+        "/artifacts",                 # will be tested
+        "/tmp/nuclei_artifacts",      # good fallback
+    ]
+    artifacts_dir = _first_writable_dir(requested_artifacts)
 
-    # Force HOME to a writable place so nuclei stores config/templates under /cache
+    cache_dir = _first_writable_dir([
+        os.getenv("CACHE_DIR"),
+        mod_in.get("cache_dir"),
+        "/cache",
+        "/tmp/nuclei_cache",
+    ])
+    templates_dir = Path(os.getenv("NUCLEI_TEMPLATES") or str(cache_dir / "nuclei-templates"))
+    xdg_cfg = Path(os.getenv("XDG_CONFIG_HOME") or str(cache_dir / ".config"))
+
+    # env
     os.environ.setdefault("HOME", str(cache_dir))
     os.environ["XDG_CONFIG_HOME"] = str(xdg_cfg)
 
-    target = (os.getenv("TARGET") or mod_in.get("target") or "").strip()
-    jsonl_path = Path(mod_in.get("jsonl_path") or artifacts_dir / "nuclei.jsonl")
-    debug_log  = artifacts_dir / "nuclei.debug.log"
+    # target + files
+    target = (os.getenv("TARGET") or mod_in.get("target") or mod_in.get("inputs", {}).get("target_url") or "").strip()
 
-    # Ensure dirs
-    for p in (artifacts_dir, cache_dir, templates_dir, xdg_cfg, debug_log.parent):
-        p.mkdir(parents=True, exist_ok=True)
+    # Align artifact file paths to the writable artifacts_dir
+    jsonl_path = Path(mod_in.get("jsonl_path") or (artifacts_dir / "nuclei.jsonl"))
+    debug_log_path = artifacts_dir / "nuclei.debug.log"  # optional, file logging off by default
 
-    # Open debug sink
-    dbg = debug_log.open("w", encoding="utf-8")
+    # ensure dirs exist (best-effort)
+    for p in (artifacts_dir, cache_dir, templates_dir, xdg_cfg, debug_log_path.parent):
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+        except Exception as ex:
+            _eprint(f"[wrapper] WARN: could not mkdir {p}: {ex}")
+
+    # Final permission sanity check before any file opens; force /tmp if needed
+    try:
+        if not os.access(str(artifacts_dir), os.W_OK):
+            raise PermissionError(f"artifacts_dir not writable: {artifacts_dir}")
+    except Exception as ex:
+        _eprint(f"[wrapper] WARN: artifacts dir not writable ({ex}); forcing /tmp fallback")
+        artifacts_dir = _first_writable_dir(["/tmp/nuclei_artifacts_fallback", "/tmp/nuclei_artifacts"])
+        jsonl_path = artifacts_dir / "nuclei.jsonl"
+        debug_log_path = artifacts_dir / "nuclei.debug.log"
+        try:
+            artifacts_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+
+    # ---- logging strategy ----
+    # Print everything to console (stderr). Optional file logging only if explicitly enabled.
+    ENABLE_DEBUG_FILE = os.getenv("ENABLE_DEBUG_FILE", "0") == "1"
+    dbg_file = None
+
     def log(msg: str):
-        dbg.write(msg + "\n"); dbg.flush(); _eprint(msg)
+        _eprint(msg)
+        if dbg_file is not None:
+            try:
+                dbg_file.write(msg + "\n")
+                dbg_file.flush()
+            except Exception:
+                pass
 
+    if ENABLE_DEBUG_FILE:
+        try:
+            dbg_file = debug_log_path.open("w", encoding="utf-8")
+        except Exception as ex:
+            _eprint(f"[wrapper] WARN: debug log file not writable ({ex}); continuing without file")
+
+    # banner
+    log(f"[wrapper] build_id={os.getenv('WRAPPER_BUILD_ID','(none)')}")
     log(f"[wrapper] started_at={started_at}")
     log(f"[wrapper] target={target or '(missing)'}")
     log(f"[wrapper] artifacts_dir={artifacts_dir}")
@@ -245,31 +293,57 @@ def main():
     log(f"[wrapper] HOME={os.getenv('HOME')}")
     log(f"[wrapper] XDG_CONFIG_HOME={os.getenv('XDG_CONFIG_HOME')}")
 
-    # Nuclei version
+    # extra diagnostics
+    if os.getenv("WRAPPER_DEBUG") == "1":
+        try:
+            import getpass, platform, shutil
+            log("[diag] ===== debug mode on =====")
+            log(f"[diag] python_exe={sys.executable}")
+            log(f"[diag] argv={' '.join(shlex.quote(a) for a in sys.argv)}")
+            log(f"[diag] cwd={os.getcwd()}")
+            log(f"[diag] uid={os.getuid()} gid={os.getgid()} user={getpass.getuser()}")
+            log(f"[diag] platform={platform.platform()}")
+            log(f"[diag] which_nuclei={shutil.which('nuclei')}")
+            log(f"[diag] perms artifacts: exists={os.path.exists(str(artifacts_dir))} "
+                f"writable={os.access(str(artifacts_dir), os.W_OK)}")
+            log(f"[diag] perms cache: exists={os.path.exists(str(cache_dir))} "
+                f"writable={os.access(str(cache_dir), os.W_OK)}")
+            allow = {"HOME","XDG_CONFIG_HOME","NUCLEI_TEMPLATES","NUCLEI_SKIP_UPDATE",
+                     "WRAPPER_BUILD_ID","TARGET","NUCLEI_ARGS","ARTIFACTS_DIR","CACHE_DIR"}
+            env_dump = {k: v for k, v in os.environ.items() if k in allow}
+            log(f"[diag] env={json.dumps(env_dump)}")
+        except Exception as ex:
+            log(f"[diag] early diagnostics failed: {ex}")
+
+    # nuclei version
     try:
         ver = subprocess.run(["nuclei", "-version"], capture_output=True, text=True, check=False)
         log(ver.stdout.strip() or ver.stderr.strip() or "[wrapper] nuclei -version produced no output")
     except Exception as ex:
         log(f"[wrapper] ERROR: cannot exec nuclei: {ex}")
 
+    # require target
     if not target:
         artifacts = [
-            {"path": str(debug_log), "type": "txt",  "description": "Nuclei debug log"},
             {"path": str(jsonl_path), "type": "json", "description": "Nuclei raw JSONL"},
         ]
-        dbg.close()
-        _json_out({"status": "error", "error": "missing target (stdin target or TARGET env)", "findings": [], "artifacts": artifacts})
+        if ENABLE_DEBUG_FILE and debug_log_path.exists():
+            artifacts.append({"path": str(debug_log_path), "type": "txt", "description": "Nuclei debug log"})
+        if dbg_file:
+            dbg_file.close()
+        _json_out({"status": "error", "error": "missing target (stdin target or TARGET env)",
+                   "findings": [], "artifacts": artifacts})
 
-    # Ensure templates (rootless)
+    # templates
     _ensure_templates(templates_dir, cache_dir, log)
     tpl_count = _count_templates(templates_dir, log)
     log(f"[wrapper] templates_available={tpl_count}")
 
-    # Build URL list
+    # urls
     urls_file, urls_count = _harvest_urls(artifacts_dir, target, log)
     log(f"[wrapper] urls_count={urls_count}")
 
-    # Build nuclei cmd
+    # nuclei cmd
     cmd = ["nuclei", "-t", str(templates_dir), "-silent", "-retries", "1", "-jle", str(jsonl_path)]
     if urls_count > 0:
         cmd += ["-l", str(urls_file)]
@@ -284,21 +358,26 @@ def main():
 
     log(f"[wrapper] running: {' '.join(shlex.quote(c) for c in cmd)}")
     proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.stdout: log(proc.stdout.strip())
-    if proc.stderr: log(proc.stderr.strip())
+    if proc.stdout:
+        log(proc.stdout.strip())
+    if proc.stderr:
+        log(proc.stderr.strip())
     log(f"[wrapper] exit_code={proc.returncode}")
 
     artifacts = [
         {"path": str(jsonl_path), "type": "json", "description": "Nuclei raw JSONL"},
-        {"path": str(debug_log),  "type": "txt",  "description": "Nuclei debug log"},
         {"path": str(urls_file),  "type": "txt",  "description": "URL list used by Nuclei"},
     ]
+    if ENABLE_DEBUG_FILE and debug_log_path.exists():
+        artifacts.append({"path": str(debug_log_path), "type": "txt", "description": "Nuclei debug log"})
 
     if proc.returncode != 0:
-        dbg.close()
-        _json_out({"status": "error", "error": f"nuclei exited {proc.returncode}", "findings": [], "artifacts": artifacts})
+        if dbg_file:
+            dbg_file.close()
+        _json_out({"status": "error", "error": f"nuclei exited {proc.returncode}",
+                   "findings": [], "artifacts": artifacts})
 
-    # Parse JSONL -> normalized findings (lenient)
+    # parse jsonl → findings
     findings = []
     try:
         if jsonl_path.exists():
@@ -313,9 +392,9 @@ def main():
                         continue
                     info = evt.get("info") or {}
                     title = info.get("name") or evt.get("template-id", "nuclei")
-                    sev   = str(info.get("severity", "info"))
+                    sev = str(info.get("severity", "info"))
                     match = evt.get("matched-at") or evt.get("host") or target
-                    fid   = evt.get("template-id", "nuclei")
+                    fid = evt.get("template-id", "nuclei")
                     if evt.get("matcher-name"):
                         fid += f":{evt['matcher-name']}"
                     findings.append({
@@ -331,7 +410,8 @@ def main():
     except Exception as ex:
         log(f"[wrapper] WARN: JSONL parse failed: {ex}")
 
-    dbg.close()
+    if dbg_file:
+        dbg_file.close()
     _json_out({"status": "ok", "findings": findings, "artifacts": artifacts, "stderr": ""})
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+# Base: official nuclei image (Alpine)
+FROM projectdiscovery/nuclei:latest
+
+# Install Python 3 for our wrapper
+RUN apk add --no-cache python3 py3-pip
+
+# App files
+WORKDIR /app
+# If you also have requirements.txt, copy and pip install here.
+COPY core/plugins/web/nuclei/main.py /app/main.py
+
+# Default envs (writable locations)
+ENV HOME=/cache \
+    XDG_CONFIG_HOME=/cache/.config \
+    NUCLEI_TEMPLATES=/cache/nuclei-templates \
+    NUCLEI_SKIP_UPDATE=true \
+    WRAPPER_BUILD_ID=wrapper-bin-2025-09-03
+
+# Run the Python wrapper by default
+ENTRYPOINT ["python3", "/app/main.py"]

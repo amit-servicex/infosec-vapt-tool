@@ -332,3 +332,77 @@ export ZAP_DOCKER_EXTRA_ARGS="--network host"
 
 # Optional: surface verbose wrapper logs in our module
 export DEBUG_ZAP=1
+export SQLMAP_DOCKER_IMAGE="sqlmapproject/sqlmap"
+
+
+# Try Parrot’s image
+docker pull parrotsec/sqlmap
+docker run --rm parrotsec/sqlmap sqlmap --version
+
+# Tell your plugin to use it
+export SQLMAP_DOCKER_IMAGE="parrotsec/sqlmap"
+export FFUF_DOCKER_IMAGE=secsi/ffuf:2.0.0
+
+
+
+🔒 VAPT Tool Progress
+
+Integrated Scanners
+
+ZAP (passive/active web scan)
+
+Nuclei (template-based vuln checks)
+
+sqlmap (SQLi exploitation)
+
+ffuf (fuzzing & content discovery)
+→ Each runs in Docker and saves results in workspace/<tool>/findings.json.
+
+Aggregator Module (core/plugins/report/aggregate/main.py)
+
+Reads outputs from all four tools.
+
+Normalizes URLs (scheme/host/path/query).
+
+Dedupes by (host, path, parameter?, type).
+
+Canonical finding schema fields:
+id, type, url, norm{}, method, parameter, location,
+severity, confidence, sources[], evidence, tags[],
+timestamp, compliance{}
+Merges overlapping findings, escalates severity/confidence, trims evidence.
+
+Writes merged file → workspace/findings.json.
+
+Emits artifacts/aggregate-summary.json and artifacts/aggregate-debug.log.
+
+✅ Last run: 37 raw → 5 unique findings (32 deduped).
+
+Compliance Expert Agent (core/agents/compliance_expert/main.py)
+
+Reads workspace/findings.json.
+
+Loads compliance packs from configs/crosswalks/ (pci.json, iso27001.json, gdpr.json).
+
+Maps findings to compliance clauses (PCI DSS, ISO 27001, GDPR).
+
+Adds rationale + evidence refs per finding.
+
+Writes enriched file → workspace/findings.enriched.json.
+
+Emits artifacts/compliance-expert-summary.json + compliance-expert-debug.log.
+
+Currently warns “no crosswalk packs loaded” when the JSONs are missing.
+
+Compliance Crosswalks
+
+configs/crosswalks/pci.json → e.g., sqli.* → PCI 6.5.1/11.3.1
+
+configs/crosswalks/iso27001.json → e.g., xss.* → ISO A.8.25
+
+configs/crosswalks/gdpr.json → DSL rules (regex evidence → GDPR Art.32, etc.)
+
+source ./setup_vapt.sh
+
+cd /home/amitks/infosec-vapt-tool/core/plugins/web/nuclei/
+docker build -f Dockerfile.nuclei-wrapper -t vapt-nuclei:wrapper .

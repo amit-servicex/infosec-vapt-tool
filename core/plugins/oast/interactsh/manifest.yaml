@@ -1,3 +1,15 @@
 id: oast.interactsh
 version: "0.1.0"
-type: oast
+type: scan
+inputs:
+  - mode              # "broker" (emit session) or "poll" (harvest callbacks)
+  - max_duration_sec  # poll duration (default 120)
+  - interactsh_server # optional custom server
+  - request_map       # file path or dict: {req_id: {url, method, param}}
+outputs:
+  - artifacts:
+      - "oast/interactsh-session.json"
+      - "oast/interactsh-events.jsonl"
+      - "oast/oast-debug.log"
+  - findings: true
+capabilities: [ oast, passive ]

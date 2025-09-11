@@ -46,7 +46,15 @@ def _run_module_docker(spec: ModuleSpec, m_input: Dict[str, Any]) -> Dict[str, A
                 "started_at":started.isoformat(),"ended_at":datetime.utcnow().isoformat(),
                 "module_entrypoint":"<docker>"}
 
-    cmd = ["docker","run","--rm","-i","--cap-drop","ALL","--security-opt","no-new-privileges"]
+    #cmd = ["docker","run","--rm","-i","--cap-drop","ALL","--security-opt","no-new-privileges"]
+    cmd = ["docker","run","--rm","-i"]
+    if spec.id == "web.nuclei.basic":
+    # Hardened but functional for this binary:
+        cmd += ["--cap-drop","ALL"]  # keep caps dropped
+        # NOTE: do NOT add "no-new-privileges" here
+    else:
+        # default hardened path for the rest
+        cmd += ["--cap-drop","ALL","--security-opt","no-new-privileges"]
 
     # Resources
     if spec.resources and spec.resources.cpu:    cmd += ["--cpus",  spec.resources.cpu]

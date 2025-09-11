@@ -1,0 +1,8 @@
+id: web.intruder
+version: "0.1.0"
+type: attack
+inputs: [ request, payloads, payload_wordlists, threads, rate_limit_per_sec, mode, oast_session_path ]
+outputs:
+  - artifacts: ["intruder-requests.jsonl", "intruder-debug.log", "oast/request_map.json"]
+  - findings: true
+capabilities: [ fuzz, replay ]

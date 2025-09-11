@@ -1,18 +1,30 @@
+# /home/amitks/infosec-vapt-tool/core/plugins/web/nuclei/manifest.yaml
 id: web.nuclei.basic
 name: Nuclei Templates
 description: "Nuclei templates scan"
 capabilities: [passive, web]
-entrypoint: main.py
-runtime: docker
-image: whz/vapt-nuclei:0.1.10
-cmd: ["python","/app/main.py"]
-workdir: /app
-user: "1000:1000"
+
+runtime: process
+workdir: /home/amitks/infosec-vapt-tool
+entrypoint: /home/amitks/infosec-vapt-tool/core/plugins/web/nuclei/main.py
+# no 'cmd' field — your runner executes entrypoint directly
+
+inputs:
+  - target_url?
+  - args?
+
+outputs:
+  - artifacts: ["nuclei.jsonl", "urls.txt"]
+  - findings: true
+
 env:
-  - "HOME=/cache"
-  - "XDG_CONFIG_HOME=/cache/.config"
-  - "NUCLEI_TEMPLATES=/cache/nuclei-templates"   # <— explicit template dir
-volumes:
-  - { name: artifacts, mountPath: /artifacts }
-  - { name: cache,     mountPath: /cache }
+  # ensure venv python & nuclei are found
+  - "PATH=/home/amitks/infosec-vapt-tool/.venv/bin:/home/amitks/.local/bin:${PATH}"
+  - "HOME=/home/amitks"
+  - "XDG_CONFIG_HOME=/home/amitks/.config"
+  - "NUCLEI_TEMPLATES=/home/amitks/.cache/nuclei-templates"
+  - "NUCLEI_SKIP_UPDATE=true"
+  - "ARTIFACTS_DIR=/tmp/nuclei_artifacts"
+  - "ENABLE_DEBUG_FILE=0"
+
 resources: { cpu: "1", memory: "1g" }

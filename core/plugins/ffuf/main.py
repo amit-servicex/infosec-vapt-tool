@@ -1,27 +1,65 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json, sys, os, re, shutil, subprocess, uuid, time, tempfile, urllib.parse, statistics
+import json, sys, os, re, shutil, subprocess, uuid, time, tempfile, urllib.parse, statistics, traceback
 from datetime import datetime
 
-# ---------- Utilities ----------
+# ========================
+# Logging helpers
+# ========================
 
-def log(msg, debug_fp):
-    ts = datetime.utcnow().isoformat()
-    line = f"[web.ffuf] {ts} {msg}\n"
-    debug_fp.write(line)
-    debug_fp.flush()
+def _ts():
+    return datetime.utcnow().isoformat()
+
+def _fmt(msg):
+    return f"[web.ffuf] {_ts()} {msg}"
+
+class Logger:
+    def __init__(self, path, quiet=False):
+        self.path = path
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        self.fp = open(path, "a", encoding="utf-8")
+        self.quiet = quiet
+
+    def log(self, msg):
+        line = _fmt(msg)
+        self.fp.write(line + "\n")
+        self.fp.flush()
+        if not self.quiet:
+            print(line, file=sys.stderr)
+
+    def close(self):
+        try:
+            self.fp.close()
+        except Exception:
+            pass
 
 def ensure_dirs(*paths):
     for p in paths:
         os.makedirs(p, exist_ok=True)
 
+def safe_json_load(path, default=None, logger=None):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        if logger:
+            logger.log(f"safe_json_load: failed to read {path}: {e}")
+        return default
+
+def safe_json_dump(obj, path, logger=None):
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        if logger:
+            logger.log(f"safe_json_dump: failed to write {path}: {e}")
+
 def load_stdin_module_input():
     try:
         raw = sys.stdin.read()
-        if not raw.strip():
-            return {}
-        return json.loads(raw)
+        return json.loads(raw) if raw.strip() else {}
     except Exception:
         return {}
 
@@ -30,103 +68,86 @@ def which_ffuf():
 
 def docker_cmd(image, workdir, extra_docker_args=None):
     absw = os.path.abspath(workdir)
-    cmd = ["docker", "run", "--rm",
-           "-v", f"{absw}:{absw}",
-           "-w", absw]
+    cmd = ["docker", "run", "--rm", "-v", f"{absw}:{absw}", "-w", absw]
     if extra_docker_args:
         cmd += list(extra_docker_args)
-    cmd += [image, "ffuf"]
+    # secsi/ffuf uses ffuf as entrypoint; do NOT append "ffuf" again.
+    cmd += [image]
     return cmd
 
-
-def safe_json_load(path, default=None):
+def docker_preflight(image, logger, workdir, extra_docker_args):
+    logger.log("PHASE=DOCKER: preflight begin")
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return default
+        out = subprocess.run(["docker", "--version"], check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        logger.log(f"docker --version rc={out.returncode} out={out.stdout.strip()}")
+    except Exception as e:
+        logger.log(f"docker --version failed: {e}")
 
-def safe_json_dump(obj, path):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(obj, f, indent=2, ensure_ascii=False)
-
-def read_lines(path):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return [x.strip() for x in f if x.strip()]
-    except Exception:
-        return []
+        test = docker_cmd(image, workdir, extra_docker_args) + ["-V"]
+        logger.log(f"docker preflight run: {' '.join(test)}")
+        out = subprocess.run(test, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        logger.log(f"preflight rc={out.returncode} out-tail={(out.stdout or '').strip()[:400]}")
+    except Exception as e:
+        logger.log(f"docker preflight run failed: {e}")
+    logger.log("PHASE=DOCKER: preflight end")
 
 def parse_query_params(url):
     parsed = urllib.parse.urlparse(url)
     q = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
-    # q: {param: [value1, ...]}
-    params = {k: (v[0] if v else "") for k,v in q.items()}
-    return params
+    return {k: (v[0] if v else "") for k, v in q.items()}
 
 def replace_query_value(url, key, new_value):
     parsed = urllib.parse.urlparse(url)
     qs = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
     qs[key] = [new_value]
-    new_query = urllib.parse.urlencode([(k, v[0] if isinstance(v, list) else v) for k,v in qs.items()], doseq=True)
+    new_query = urllib.parse.urlencode([(k, v[0] if isinstance(v, list) else v) for k, v in qs.items()], doseq=True)
     return urllib.parse.urlunparse(parsed._replace(query=new_query))
 
 def build_post_body_with_fuzz(body_str, mapping):
-    # body like "a=1&b=2" -> replace a/b values per mapping
     pairs = urllib.parse.parse_qsl(body_str, keep_blank_values=True)
     out = []
-    for k,v in pairs:
-        if k in mapping:
-            out.append((k, mapping[k]))
-        else:
-            out.append((k, v))
+    for k, v in pairs:
+        out.append((k, mapping.get(k, v)))
     return urllib.parse.urlencode(out)
 
 def guess_body_from_candidate(c):
-    # Accept raw string body or dict; normalize to "k=v&..."
     body = c.get("body")
     if body is None:
         return None
     if isinstance(body, str):
         return body
     if isinstance(body, dict):
-        return urllib.parse.urlencode([(k, str(v)) for k,v in body.items()])
+        return urllib.parse.urlencode([(k, str(v)) for k, v in body.items()])
     return None
 
-# ---------- Candidate harvesting ----------
-
-def harvest_from_zap(workdir, debug_fp):
-    # best-effort: workspace/zap/findings.json (your pipeline emits this)
+def harvest_from_zap(workdir, logger):
     zap_path = os.path.join(workdir, "workspace", "zap", "findings.json")
-    data = safe_json_load(zap_path, default=[])
+    j = safe_json_load(zap_path, default=[], logger=logger) or []
     out = []
-    for item in data:
-        url = item.get("url") or item.get("evidence", {}).get("url")
+    for item in j:
+        url = item.get("url") or (item.get("evidence") or {}).get("url")
         method = (item.get("method") or "GET").upper()
         if not url:
             continue
-        body = item.get("requestBody")
-        out.append({"method": method, "url": url, "body": body})
-    log(f"harvest_from_zap: {len(out)} candidates", debug_fp)
+        out.append({"method": method, "url": url, "body": item.get("requestBody")})
+    logger.log(f"harvest_from_zap: {len(out)} candidates")
     return out
 
-def harvest_from_nuclei(workdir, debug_fp):
-    # common artifact path from your Week-1 notes
-    # try artifacts/nuclei.jsonl (raw) or workspace/nuclei/findings.json
+def harvest_from_nuclei(workdir, logger):
     paths = [
         os.path.join(workdir, "artifacts", "nuclei.jsonl"),
-        os.path.join(workdir, "workspace", "nuclei", "findings.json")
+        os.path.join(workdir, "workspace", "nuclei", "findings.json"),
     ]
-    out = []
-    count = 0
+    out, count = [], 0
     for p in paths:
-        if not os.path.exists(p): 
+        if not os.path.exists(p):
             continue
         if p.endswith(".jsonl"):
             with open(p, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-                    if not line: 
+                    if not line:
                         continue
                     try:
                         j = json.loads(line)
@@ -137,64 +158,47 @@ def harvest_from_nuclei(workdir, debug_fp):
                         out.append({"method": "GET", "url": url})
                         count += 1
         else:
-            j = safe_json_load(p, default=[])
+            j = safe_json_load(p, default=[], logger=logger) or []
             for item in j:
                 url = item.get("url")
                 if url:
                     out.append({"method": "GET", "url": url})
                     count += 1
-    log(f"harvest_from_nuclei: {count} candidates", debug_fp)
+    logger.log(f"harvest_from_nuclei: {count} candidates")
     return out
 
-def normalize_candidates(inputs, workdir, debug_fp):
+def normalize_candidates(inputs, workdir, logger):
     cands = []
-    # 1) explicit candidates
-    explicit = inputs.get("candidates") or []
-    for c in explicit:
+    for c in (inputs.get("candidates") or []):
         if isinstance(c, str):
             cands.append({"method": "GET", "url": c})
         elif isinstance(c, dict) and c.get("url"):
             m = (c.get("method") or "GET").upper()
             cands.append({"method": m, "url": c["url"], "body": c.get("body")})
-    # 2) from sources
     sources = set([s.lower() for s in (inputs.get("candidates_from") or [])])
     if "zap" in sources:
-        cands.extend(harvest_from_zap(workdir, debug_fp))
+        cands.extend(harvest_from_zap(workdir, logger))
     if "nuclei" in sources:
-        cands.extend(harvest_from_nuclei(workdir, debug_fp))
-    # 3) base_urls fallback
+        cands.extend(harvest_from_nuclei(workdir, logger))
     for u in (inputs.get("base_urls") or []):
         cands.append({"method": "GET", "url": u})
 
-    # Dedup by (method,url,body)
-    seen = set()
-    uniq = []
+    seen, uniq = set(), []
     for c in cands:
         key = (c["method"], c["url"], json.dumps(c.get("body"), sort_keys=True) if isinstance(c.get("body"), dict) else c.get("body"))
-        if key in seen: 
+        if key in seen:
             continue
         seen.add(key)
         uniq.append(c)
     return uniq
 
-# ---------- FUZZ target builders ----------
-
 def build_sniper_targets(candidate):
-    """
-    Return a list of ffuf invocations (each with its own URL/body having a single FUZZ placeholder)
-    """
-    method = candidate["method"]
-    url = candidate["url"]
+    method, url = candidate["method"], candidate["url"]
     targets = []
-
-    # Query params
-    qparams = parse_query_params(url)
-    for key in qparams.keys():
+    for key in parse_query_params(url).keys():
         fu_url = replace_query_value(url, key, "FUZZ")
         targets.append({"method": method, "url": fu_url, "param": key, "location": "query"})
-
-    # Body params for POST/PUT/PATCH (application/x-www-form-urlencoded assumed for fuzzing)
-    if method in ("POST","PUT","PATCH"):
+    if method in ("POST", "PUT", "PATCH"):
         body_str = guess_body_from_candidate(candidate) or ""
         if body_str:
             body_params = dict(urllib.parse.parse_qsl(body_str, keep_blank_values=True))
@@ -203,151 +207,106 @@ def build_sniper_targets(candidate):
                 targets.append({"method": method, "url": url, "param": key, "location": "body", "body": fu_body})
     return targets
 
-def build_clusterbomb_target(candidate, max_slots, reuse_same_wordlists):
-    """
-    Build ONE clusterbomb target per candidate.
-    We’ll place FUZZ, FUZZ2, FUZZ3 ... in each param up to max_slots.
-    """
-    method = candidate["method"]
-    url = candidate["url"]
-    mapping = {}
-    param_names = []
-
-    # Take query first
-    qparams = parse_query_params(url)
+def build_clusterbomb_target(candidate, max_slots, reuse_same_wordlists=True):
+    method, url = candidate["method"], candidate["url"]
+    param_names, qparams = [], parse_query_params(url)
     for k in qparams.keys():
         param_names.append(("query", k))
-    # Then body (for POST-like)
+
     body_str = None
-    if method in ("POST","PUT","PATCH"):
+    if method in ("POST", "PUT", "PATCH"):
         body_str = guess_body_from_candidate(candidate) or ""
         if body_str:
-            bparams = dict(urllib.parse.parse_qsl(body_str, keep_blank_values=True))
-            for k in bparams.keys():
+            for k in dict(urllib.parse.parse_qsl(body_str, keep_blank_values=True)).keys():
                 param_names.append(("body", k))
 
-    # cap to max_slots
     param_names = param_names[:max_slots]
     if not param_names:
         return None
 
-    # assign FUZZ placeholders
     placeholders = []
     for i, (_loc, _k) in enumerate(param_names, start=1):
         placeholders.append("FUZZ" if i == 1 else f"FUZZ{i}")
 
-    # build mutated url/body
     new_url = url
-    if qparams:
-        for i, (loc, k) in enumerate(param_names, start=1):
-            if loc != "query": continue
-            ph = "FUZZ" if i == 1 else f"FUZZ{i}"
-            new_url = replace_query_value(new_url, k, ph)
+    for i, (loc, k) in enumerate(param_names, start=1):
+        if loc != "query":
+            continue
+        ph = "FUZZ" if i == 1 else f"FUZZ{i}"
+        new_url = replace_query_value(new_url, k, ph)
 
     new_body = body_str
     if body_str:
-        bmapping = {}
+        bm = {}
         for i, (loc, k) in enumerate(param_names, start=1):
-            if loc != "body": continue
-            ph = "FUZZ" if i == 1 else f"FUZZ{i}"
-            bmapping[k] = ph
-        if bmapping:
-            new_body = build_post_body_with_fuzz(body_str, bmapping)
+            if loc != "body":
+                continue
+            bm[k] = "FUZZ" if i == 1 else f"FUZZ{i}"
+        if bm:
+            new_body = build_post_body_with_fuzz(body_str, bm)
 
     return {
         "method": method,
         "url": new_url,
         "body": new_body,
-        "locations": param_names,   # list of (location, name)
+        "locations": param_names,
         "placeholders": placeholders,
-        "reuse_same_wordlists": reuse_same_wordlists
+        "reuse_same_wordlists": reuse_same_wordlists,
     }
 
-# ---------- ffuf runner ----------
-
-def run_ffuf(job, wordlists, mode, rate, threads, timeout_sec, filters, matchers, extra_args, ffuf_bin, docker_image, artifacts_dir, debug_fp):
-    """
-    job:
-      sniper: {method,url,param,location,body?}
-      clusterbomb: {method,url,body?, placeholders[], reuse_same_wordlists}
-    Returns output json path (string) or None
-    """
+def run_ffuf(job, wordlists, mode, rate, threads, timeout_sec, filters, matchers, extra_args,
+             ffuf_bin, docker_image, workdir, artifacts_dir, logger, extra_docker_args):
     out_json = os.path.join(artifacts_dir, f"ffuf-{uuid.uuid4().hex}.json")
-    cmd = []
+    cmd = [ffuf_bin] if ffuf_bin else docker_cmd(docker_image, workdir, extra_docker_args)
 
-    if ffuf_bin:
-        cmd = [ffuf_bin]
-    else:
-        cmd = docker_cmd(docker_image)
-        cmd += ["ffuf"]  # container entrypoint
-
+    # Base args
     cmd += ["-of", "json", "-o", out_json, "-rate", str(rate), "-t", str(threads), "-timeout", str(timeout_sec)]
-    # method
     if job.get("method", "GET") != "GET":
         cmd += ["-X", job["method"]]
-
-    # URL/body
     cmd += ["-u", job["url"]]
     if job.get("body"):
-        cmd += ["-d", job["body"]]
-        # Assume form content-type unless overridden by extra_args
-        cmd += ["-H", "Content-Type: application/x-www-form-urlencoded"]
+        cmd += ["-d", job["body"], "-H", "Content-Type: application/x-www-form-urlencoded"]
 
-    # Mode & wordlists
+    # Mode/wordlists
     if mode == "sniper":
-        # single FUZZ
         wl = wordlists[0] if wordlists else "configs/wordlists/quick.txt"
-        cmd += ["-w", wl]
-        # optional: -mode sniper (ffuf defaults are replaced-based; explicit is fine)
-        cmd += ["-mode", "sniper"]
+        cmd += ["-w", wl, "-mode", "sniper"]
     else:
-        # clusterbomb
         placeholders = job["placeholders"]
-        # ffuf understands multiple wordlists; placeholders are FUZZ, FUZZ2, ...
-        # attach :<KEY> (the placeholder) to each -w
         if not wordlists:
             wordlists = ["configs/wordlists/quick.txt"] * len(placeholders)
         elif len(wordlists) < len(placeholders) and job.get("reuse_same_wordlists", True):
-            # reuse last for remaining
             last = wordlists[-1]
             wordlists = wordlists + [last] * (len(placeholders) - len(wordlists))
         for i, ph in enumerate(placeholders):
-            wl = wordlists[i]
-            cmd += ["-w", f"{wl}:{ph}"]
+            cmd += ["-w", f"{wordlists[i]}:{ph}"]
         cmd += ["-mode", "clusterbomb"]
 
-    # Filters & matchers (pass-through)
-    for tok in (filters or []):
-        cmd.append(tok)
-    for tok in (matchers or []):
-        cmd.append(tok)
-    for tok in (extra_args or []):
-        cmd.append(tok)
+    for tok in (filters or []): cmd.append(tok)
+    for tok in (matchers or []): cmd.append(tok)
+    for tok in (extra_args or []): cmd.append(tok)
 
-    log(f"Running ffuf: {' '.join(cmd)}", debug_fp)
-
+    logger.log(f"RUN CMD: {' '.join(cmd)}")
+    rc = 997
     try:
         proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)
-        if proc.stdout:
-            debug_fp.write(proc.stdout + ("\n" if not proc.stdout.endswith("\n") else ""))
         rc = proc.returncode
-        if rc not in (0,):
-            log(f"ffuf non-zero exit: {rc}", debug_fp)
-        # ffuf writes JSON even on no-matches; ensure file exists
+        # log tail of ffuf output
+        if proc.stdout:
+            logger.log(f"ffuf stdout (tail 800):\n{proc.stdout[-800:]}")
+        if rc != 0:
+            logger.log(f"ffuf exit code: {rc}")
         if not os.path.exists(out_json):
-            # Create an empty valid structure
-            safe_json_dump({"results": [], "meta": {"cmd": cmd}}, out_json)
-        return out_json
+            logger.log(f"ffuf did not create output, synthesizing empty: {out_json}")
+            safe_json_dump({"results": [], "meta": {"cmd": cmd, "rc": rc}}, out_json, logger=logger)
+        return out_json, rc
     except Exception as e:
-        log(f"ffuf run failed: {e}", debug_fp)
-        return None
-
-# ---------- Post-processing & findings ----------
+        logger.log(f"EXC while running ffuf: {e}")
+        logger.log("TRACE:\n" + "".join(traceback.format_exc()[-1500:]))
+        safe_json_dump({"results": [], "meta": {"error": str(e)}}, out_json, logger=logger)
+        return out_json, rc
 
 def compute_anomaly_flags(results):
-    """
-    Given ffuf result entries (each has status, words, lines, length), mark anomalies compared to median.
-    """
     if not results:
         return {}
     metrics = {"status": [], "length": [], "words": [], "lines": []}
@@ -358,77 +317,45 @@ def compute_anomaly_flags(results):
                 metrics[k].append(v)
     med = {}
     for k, arr in metrics.items():
-        if arr:
-            try:
-                med[k] = int(statistics.median(arr))
-            except Exception:
-                med[k] = None
-        else:
-            med[k] = None
+        med[k] = int(statistics.median(arr)) if arr else None
     return med
 
 SQLI_HINTS = [
     "you have an error in your sql syntax",
     "unclosed quotation mark after the character string",
     "quoted string not properly terminated",
-    "mysql",
-    "postgresql",
-    "sqlite",
-    "odbc",
-    "oracle",
-    "syntax error",
-    "fatal error"
+    "mysql", "postgresql", "sqlite", "odbc", "oracle", "syntax error", "fatal error",
 ]
 
 def likely_sqli(entry):
-    # ffuf JSON doesn’t include body; rely on title/banner if present and size jumps
-    title = (entry.get("redirectlocation") or "") + " " + (entry.get("url") or "")
-    title = title.lower()
-    if any(h in title for h in SQLI_HINTS):
+    t = ((entry.get("redirectlocation") or "") + " " + (entry.get("url") or "")).lower()
+    if any(h in t for h in SQLI_HINTS):
         return True
-    # if status is 500 and huge size jump, flag
-    if entry.get("status") == 500 and entry.get("length", 0) > 20000:
-        return True
-    return False
+    return entry.get("status") == 500 and entry.get("length", 0) > 20000
 
 def normalize_ffuf_result(entry, meta):
-    """
-    Convert one ffuf result line into our unified finding schema.
-    """
-    url = entry.get("url") or meta.get("target_url")
-    method = meta.get("method", "GET")
-    attack = meta.get("attack")
-    param = meta.get("param")
-    location = meta.get("location")
-    payload_map = entry.get("input") or {}  # dict of FUZZ, FUZZ2 -> payload values
-
-    # evidence
     ev = {
         "status": entry.get("status"),
         "size": entry.get("length"),
         "words": entry.get("words"),
         "lines": entry.get("lines"),
-        "payloads": payload_map
+        "payloads": entry.get("input") or {},
     }
-
-    finding = {
+    return {
         "id": "ffuf-" + uuid.uuid4().hex[:12],
         "source": "ffuf",
-        "attack": attack,
-        "url": url,
-        "method": method,
-        "parameter": param,
-        "location": location,
+        "attack": meta.get("attack"),
+        "url": entry.get("url") or meta.get("target_url"),
+        "method": meta.get("method", "GET"),
+        "parameter": meta.get("param"),
+        "location": meta.get("location"),
         "evidence": ev,
         "matcher": "ffuf-match",
         "severity": "low",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
-    return finding
 
 def mark_reflection_flags(findings, detect_reflection):
-    # Heuristic: if payload value string appears in URL (redirectlocation) field we can catch, but ffuf json is limited.
-    # Light-touch: if value contains quotes and status deviates, note it.
     if not detect_reflection:
         return findings
     for f in findings:
@@ -444,29 +371,23 @@ def assign_anomaly_and_sqli(findings, median):
         e = f.get("evidence", {})
         s, l, w, ln = e.get("status"), e.get("size"), e.get("words"), e.get("lines")
         f.setdefault("tags", [])
-        # anomaly if deviates strongly from median
         if median.get("status") and s and s != median["status"]:
-            f["tags"].append("anomaly:status")
-            f["severity"] = "medium"
+            f["tags"].append("anomaly:status"); f["severity"] = "medium"
         if median.get("length") and l and abs(l - median["length"]) > max(1000, int(0.3 * (median["length"] or 1))):
             f["tags"].append("anomaly:size")
         if median.get("words") and w and abs(w - median["words"]) > max(100, int(0.3 * (median["words"] or 1))):
             f["tags"].append("anomaly:words")
         if median.get("lines") and ln and abs(ln - median["lines"]) > max(100, int(0.3 * (median["lines"] or 1))):
             f["tags"].append("anomaly:lines")
-        # sqli hint
         if likely_sqli(e):
-            f["tags"].append("suspect:sqli")
-            f["severity"] = "medium"
+            f["tags"].append("suspect:sqli"); f["severity"] = "medium"
     return findings
 
-# ---------- Main ----------
-
 def main():
-    module_input = _load_module_input()
+    # ---------- START ----------
+    module_input = load_stdin_module_input()
     inputs = module_input.get("inputs", {}) or {}
 
-    # --- Resolve absolute paths (fixes: docker needs absolute -v/-w) ---
     raw_workdir = module_input.get("workdir") or os.getcwd()
     workdir = os.path.abspath(raw_workdir)
 
@@ -483,55 +404,69 @@ def main():
     debug_log_path = os.path.join(artifacts_dir, "ffuf-debug.log")
     logger = Logger(debug_log_path, quiet=bool(inputs.get("quiet", False)))
 
-    # --- Inputs / defaults ---
-    attack = (inputs.get("attack") or "sniper").lower()
-    rate = int(inputs.get("rate", 300))
-    threads = int(inputs.get("threads", 40))
-    timeout_sec = int(inputs.get("timeout_sec", 10))
-    filters = inputs.get("filters") or []
-    matchers = inputs.get("matchers") or []
-    extra_args = inputs.get("extra_args") or []
-    wordlists = inputs.get("wordlists") or []
-    detect_reflection = bool(inputs.get("detect_reflection", True))
-    max_targets = int(inputs.get("max_targets", 200))
-    extra_docker_args = inputs.get("extra_docker_args") or []  # e.g. ["--network","host"]
-
-    ffuf_bin = which_ffuf()
-    docker_image = os.environ.get("FFUF_DOCKER_IMAGE") or "secsi/ffuf:2.0.0"
-
     try:
-        logger.log("START web.ffuf")
+        logger.log("PHASE=START")
+        logger.log(f"ARGS module_input keys={list(module_input.keys())}")
+        logger.log(f"PATHS workdir={workdir} artifacts_dir={artifacts_dir} workspace_dir={workspace_dir} ffuf_workspace={ffuf_workspace}")
+        for p in (workdir, artifacts_dir, workspace_dir, ffuf_workspace):
+            logger.log(f"CHECK path exists? {p} -> {os.path.exists(p)}")
+
+        # Optional verbose environment
+        if (os.environ.get("LOG_LEVEL") or "").lower() == "debug":
+            env_k = ["FFUF_DOCKER_IMAGE", "PIPELINE_CONTEXT", "CI", "GITHUB_ACTIONS", "GITLAB_CI"]
+            for k in env_k:
+                logger.log(f"ENV {k}={os.environ.get(k)}")
+
+        attack = (inputs.get("attack") or "sniper").lower()
+        rate = int(inputs.get("rate", 300))
+        threads = int(inputs.get("threads", 40))
+        timeout_sec = int(inputs.get("timeout_sec", 10))
+        filters = inputs.get("filters") or []
+        matchers = inputs.get("matchers") or []
+        extra_args = inputs.get("extra_args") or []
+        wordlists = inputs.get("wordlists") or []
+        detect_reflection = bool(inputs.get("detect_reflection", True))
+        max_targets = int(inputs.get("max_targets", 200))
+        extra_docker_args = inputs.get("extra_docker_args") or []
+
+        logger.log(f"PHASE=ARGS attack={attack} rate={rate} threads={threads} timeout={timeout_sec} wordlists={wordlists} matchers={matchers} filters={filters} extra_args={extra_args} extra_docker_args={extra_docker_args}")
+
+        ffuf_bin = which_ffuf()
+        docker_image = os.environ.get("FFUF_DOCKER_IMAGE") or "secsi/ffuf:2.0.0"
         if ffuf_bin:
-            logger.log(f"Using local ffuf: {ffuf_bin}")
+            logger.log(f"FFUF local binary: {ffuf_bin}")
         else:
-            logger.log(f"No local ffuf found; using Docker image: {docker_image}")
+            logger.log(f"FFUF docker image: {docker_image}")
             docker_preflight(docker_image, logger, workdir, extra_docker_args)
 
-        # --- Gather candidates (explicit + from ZAP/Nuclei + base_urls) ---
+        # ---------- CANDIDATES ----------
+        logger.log("PHASE=CANDIDATES: start")
         cands = normalize_candidates(inputs, workdir, logger)
+        logger.log(f"CANDIDATES total={len(cands)} (cap={max_targets})")
         if len(cands) > max_targets:
-            logger.log(f"Capping candidates {len(cands)} -> {max_targets}")
             cands = cands[:max_targets]
+            logger.log(f"CANDIDATES capped -> {len(cands)}")
 
-        # --- Build ffuf jobs ---
+        # ---------- JOBS ----------
+        logger.log("PHASE=JOBS: start")
         jobs = []
         for c in cands:
             if attack == "sniper":
                 jobs.extend(build_sniper_targets(c))
             else:
-                t = build_clusterbomb_target(c, max_slots=5)
+                t = build_clusterbomb_target(
+                    c, max_slots=5,
+                    reuse_same_wordlists=bool(inputs.get("reuse_same_wordlists", True))
+                )
                 if t:
                     jobs.append(t)
-        logger.log(f"Prepared {len(jobs)} ffuf jobs (attack={attack})")
+        logger.log(f"JOBS prepared={len(jobs)}")
 
-        # --- Run jobs ---
-        raw_json_paths = []
-        jobs_ok = 0
-        jobs_fail = 0
-        all_findings = []
+        # ---------- RUN ----------
+        logger.log("PHASE=RUN: start")
+        raw_json_paths, jobs_ok, jobs_fail, all_findings = [], 0, 0, []
 
         for idx, job in enumerate(jobs, start=1):
-            # meta for normalization/logging
             meta = {
                 "method": job.get("method", "GET"),
                 "attack": attack,
@@ -541,23 +476,24 @@ def main():
                 "location": job.get("location") or (
                     ",".join([loc for (loc, _n) in job.get("locations", [])]) if "locations" in job else None
                 ),
-                "target_url": job["url"]
+                "target_url": job["url"],
             }
+            logger.log(f"[{idx}/{len(jobs)}] PHASE=RUN: job -> {meta}")
 
-            logger.log(f"[{idx}/{len(jobs)}] ffuf job -> {meta['method']} {meta['target_url']} param={meta['param']} loc={meta['location']}")
             out_json, rc = run_ffuf(
                 job, wordlists, attack, rate, threads, timeout_sec, filters, matchers, extra_args,
                 ffuf_bin, docker_image, workdir, artifacts_dir, logger, extra_docker_args
             )
             raw_json_paths.append(out_json)
+            logger.log(f"[{idx}/{len(jobs)}] OUT_JSON={out_json} rc={rc} exists={os.path.exists(out_json)}")
 
-            j = safe_json_load(out_json, default={"results": []})
+            j = safe_json_load(out_json, default={"results": []}, logger=logger) or {"results": []}
             res = j.get("results", [])
-            med = median_metrics(res)
-            chunk = [normalize_result(r, meta) for r in res]
+            med = compute_anomaly_flags(res)
+            chunk = [normalize_ffuf_result(r, meta) for r in res]
             if detect_reflection:
-                chunk = mark_reflection(chunk)
-            chunk = mark_anomalies_and_sqli(chunk, med)
+                chunk = mark_reflection_flags(chunk, True)
+            chunk = assign_anomaly_and_sqli(chunk, med)
             all_findings.extend(chunk)
 
             if rc == 0:
@@ -567,10 +503,11 @@ def main():
                 jobs_fail += 1
                 logger.log(f"[{idx}/{len(jobs)}] ERROR rc={rc} (see {out_json} and ffuf-debug.log)")
 
-        # --- Write artifacts ---
+        # ---------- POST ----------
+        logger.log("PHASE=POST: writing artifacts")
         findings_path = os.path.join(ffuf_workspace, "findings.json")
-        safe_json_dump(all_findings, findings_path)
-
+        run_summary_path = os.path.join(artifacts_dir, "ffuf-run-summary.json")
+        safe_json_dump(all_findings, findings_path, logger=logger)
         run_summary = {
             "attack": attack,
             "candidates_total": len(cands),
@@ -581,29 +518,26 @@ def main():
             "artifacts": {
                 "raw_json_files": raw_json_paths,
                 "debug_log": debug_log_path,
-                "normalized_findings": findings_path
+                "normalized_findings": findings_path,
             },
             "rate": rate,
             "threads": threads,
             "timeout_sec": timeout_sec,
-            "workdir": workdir
+            "workdir": workdir,
         }
-        run_summary_path = os.path.join(artifacts_dir, "ffuf-run-summary.json")
-        safe_json_dump(run_summary, run_summary_path)
+        safe_json_dump(run_summary, run_summary_path, logger=logger)
 
-        # --- Final status ---
         status = "ok"
         msg = f"ffuf completed: jobs_ok={jobs_ok}, jobs_fail={jobs_fail}, hits={len(all_findings)}"
         if jobs_ok == 0 and jobs_fail > 0:
             status = "error"
             msg = "ffuf failed: all jobs errored (see artifacts/ffuf-debug.log)"
 
-        logger.log(f"SUMMARY: jobs_ok={jobs_ok} jobs_fail={jobs_fail} hits={len(all_findings)}")
-        logger.log(f"Artifacts: findings={findings_path} summary={run_summary_path} log={debug_log_path}")
-        logger.log("END web.ffuf")
+        logger.log(f"PHASE=SUMMARY: jobs_ok={jobs_ok} jobs_fail={jobs_fail} hits={len(all_findings)}")
+        logger.log(f"Artifacts:\n - log={debug_log_path}\n - summary={run_summary_path}\n - findings={findings_path}")
+        logger.log("PHASE=END")
 
-        # --- Engine-facing JSON (stdout only) ---
-        result = {
+        print(json.dumps({
             "status": status,
             "message": msg,
             "findings_count": len(all_findings),
@@ -612,25 +546,19 @@ def main():
             "artifacts": [
                 {"path": debug_log_path, "type": "txt", "description": "ffuf debug log"},
                 {"path": run_summary_path, "type": "json", "description": "Run summary"},
-                {"path": findings_path, "type": "json", "description": "FFUF normalized findings"}
-            ]
-        }
-        print(json.dumps(result))
-
+                {"path": findings_path, "type": "json", "description": "FFUF normalized findings"},
+            ],
+        }))
     except Exception as e:
         logger.log(f"FATAL: {e}")
-        err = {
+        logger.log("TRACE:\n" + "".join(traceback.format_exc()[-2000:]))
+        print(json.dumps({
             "status": "error",
             "message": str(e),
-            "artifacts": [
-                {"path": debug_log_path, "type": "txt", "description": "ffuf debug log (may contain stack)"},
-            ]
-        }
-        print(json.dumps(err))
+            "artifacts": [{"path": debug_log_path, "type": "txt", "description": "ffuf debug log (with traceback)"}],
+        }))
     finally:
         logger.close()
-
-
 
 if __name__ == "__main__":
     main()
