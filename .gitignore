@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Nuclei wrapper artifacts and cache
+/data/cache/web_nuclei_basic/nuclei-templates/
+/data/cache/web_nuclei_basic/.config/
+/artifacts/nuclei.jsonl
+/artifacts/nuclei.debug.log
+/artifacts/urls.txt
+/artifacts/run/
+/cache
+/data
