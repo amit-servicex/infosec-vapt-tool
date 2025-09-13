@@ -1,0 +1,2684 @@
+{
+  "findings": [
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/artists.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=1",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=2",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=3",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/cart.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/disclaimer.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"\" method=\"post\" name=\"faddentry\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=2",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=4",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/login.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form name=\"loginform\" method=\"post\" action=\"userinfo.php\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/login.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/product.php?pic=6",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form name='f_addcart' method='POST' action='cart.php'>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/product.php?pic=6",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/signup.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form name=\"form1\" method=\"post\" action=\"/secured/newuser.php\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/signup.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/cart.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"\" method=\"post\" name=\"faddentry\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10202",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "zap",
+      "rule_id": "10202",
+      "cwe": [
+        "CWE-352"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<form action=\"search.php?test=query\" method=\"post\">",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/high",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/robots.txt",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10038",
+      "title": "Content Security Policy (CSP) Header Not Set",
+      "description": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/sitemap.xml",
+      "tool": "zap",
+      "rule_id": "10038",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/artists.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/cart.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/disclaimer.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=4",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/login.php",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10020",
+      "title": "Missing Anti-clickjacking Header",
+      "description": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+      "severity": "medium",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "zap",
+      "rule_id": "10020",
+      "cwe": [
+        "CWE-1021"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-frame-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10009",
+      "title": "In Page Banner Information Leak",
+      "description": "<p>The server returned a version banner string in the response content. Such information leaks may allow attackers to further target specific issues impacting the product and version in use.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/high",
+      "tool": "zap",
+      "rule_id": "10009",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10009",
+      "title": "In Page Banner Information Leak",
+      "description": "<p>The server returned a version banner string in the response content. Such information leaks may allow attackers to further target specific issues impacting the product and version in use.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/robots.txt",
+      "tool": "zap",
+      "rule_id": "10009",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10009",
+      "title": "In Page Banner Information Leak",
+      "description": "<p>The server returned a version banner string in the response content. Such information leaks may allow attackers to further target specific issues impacting the product and version in use.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/sitemap.xml",
+      "tool": "zap",
+      "rule_id": "10009",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/AJAX/styles.css",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Flash/add.swf",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/images/logo.gif",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Resource-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Embedder-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Embedder-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Embedder-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Opener-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Opener-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90004",
+      "title": "Insufficient Site Isolation Against Spectre Vulnerability",
+      "description": "<p>Cross-Origin-Resource-Policy header is an opt-in header designed to counter side-channels attacks like Spectre. Resource should be specifically set as shareable amongst different origins.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "90004",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "Cross-Origin-Opener-Policy",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/high",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/robots.txt",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10063",
+      "title": "Permissions Policy Header Not Set",
+      "description": "<p>Permissions Policy Header is an added layer of security that helps to restrict from unauthorized access or usage of browser/client features by web resources. This policy ensures the user privacy by limiting or specifying the features of the browsers can be used by the web resources. Permissions Policy provides a set of standard HTTP headers that allow website owners to limit which features of browsers can be used by the page such as camera, microphone, location, full screen etc.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/sitemap.xml",
+      "tool": "zap",
+      "rule_id": "10063",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/artists.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/showimage.php?file=./pictures/6.jpg",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10037",
+      "title": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+      "description": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/userinfo.php",
+      "tool": "zap",
+      "rule_id": "10037",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "X-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/AJAX/styles.css",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Flash/add.swf",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/high",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/images/logo.gif",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/images/remark.gif",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/robots.txt",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10036",
+      "title": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "description": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/sitemap.xml",
+      "tool": "zap",
+      "rule_id": "10036",
+      "cwe": [
+        "CWE-497"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "nginx/1.19.0",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/AJAX/styles.css",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Flash/add.swf",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/images/logo.gif",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/images/remark.gif",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/images/1.jpg",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/images/3.jpg",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10021",
+      "title": "X-Content-Type-Options Header Missing",
+      "description": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+      "severity": "low",
+      "location": "http://testphp.vulnweb.com/showimage.php?file=./pictures/6.jpg",
+      "tool": "zap",
+      "rule_id": "10021",
+      "cwe": [
+        "CWE-693"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "x-content-type-options",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10111",
+      "title": "Authentication Request Identified",
+      "description": "<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/secured/newuser.php",
+      "tool": "zap",
+      "rule_id": "10111",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "uemail",
+        "evidence": "upass",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=1",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=3",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/cart.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/disclaimer.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/index.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=2",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=4",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/login.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/product.php?pic=6",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/signup.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "90011",
+      "title": "Charset Mismatch (Header Versus Meta Content-Type Charset)",
+      "description": "<p>This check identifies responses where the HTTP Content-Type header declares a charset different from the charset defined by the body of the HTML or XML. When there's a charset mismatch between the HTTP header and content body Web browsers can be forced into an undesirable content-sniffing mode to determine the content's correct character set.</p><p></p><p>An attacker could manipulate content on the page to be interpreted in an encoding of their choice. For example, if an attacker can control content at the beginning of the page, they could inject script using UTF-7 encoded text and manipulate some browsers into interpreting that text.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "zap",
+      "rule_id": "90011",
+      "cwe": [
+        "CWE-436"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/AJAX/index.php",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href=\"#\" onclick=\"loadSomething('titles.php')\">titles</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?aid=1','comment','width=500,height=400')\">comment on this artist</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=1",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?aid=1','comment','width=500,height=400')\">comment on this artist</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=2",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?aid=2','comment','width=500,height=400')\">comment on this artist</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=3",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?aid=3','comment','width=500,height=400')\">comment on this artist</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?artist=1",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?pid=1','comment','width=500,height=400')\">comment on this picture</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?artist=2",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?pid=7','comment','width=500,height=400')\">comment on this picture</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?pid=1','comment','width=500,height=400')\">comment on this picture</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10109",
+      "title": "Modern Web Application",
+      "description": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=2",
+      "tool": "zap",
+      "rule_id": "10109",
+      "cwe": null,
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "<a href='#' onClick=\"window.open('./comment.php?pid=6','comment','width=500,height=400')\">comment on this picture</a>",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/AJAX/styles.css",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/categories.php",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/Flash/add.swf",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/high",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/hpp/",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/images/logo.gif",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/images/remark.gif",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/Mod_Rewrite_Shop/",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/robots.txt",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10049",
+      "title": "Storable and Cacheable Content",
+      "description": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/sitemap.xml",
+      "tool": "zap",
+      "rule_id": "10049",
+      "cwe": [
+        "CWE-524"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10031",
+      "title": "User Controllable HTML Element Attribute (Potential XSS)",
+      "description": "<p>This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/guestbook.php",
+      "tool": "zap",
+      "rule_id": "10031",
+      "cwe": [
+        "CWE-20"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "submit",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10031",
+      "title": "User Controllable HTML Element Attribute (Potential XSS)",
+      "description": "<p>This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "zap",
+      "rule_id": "10031",
+      "cwe": [
+        "CWE-20"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "goButton",
+        "evidence": "",
+        "attack": ""
+      }
+    },
+    {
+      "id": "10031",
+      "title": "User Controllable HTML Element Attribute (Potential XSS)",
+      "description": "<p>This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.</p>",
+      "severity": "info",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "zap",
+      "rule_id": "10031",
+      "cwe": [
+        "CWE-20"
+      ],
+      "tags": [],
+      "evidence": {
+        "param": "goButton",
+        "evidence": "",
+        "attack": ""
+      }
+    }
+  ]
+}

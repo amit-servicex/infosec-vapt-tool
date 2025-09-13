@@ -1,191 +1,214 @@
 #!/usr/bin/env python3
-import argparse, json, uuid, sys
+# scripts/local_run.py
+import argparse
+import json
+import os
+import sys
+import time
 from pathlib import Path
-from datetime import datetime
-from core.reporting.aggregate import merge_results
+from core.pipeline.contracts import RunConfig
+
+# ---- Imports from your codebase
+try:
+    from core.pipeline.engine import run_pipeline
+    from core.pipeline.contracts import RunConfig
+except Exception as e:
+    print("❌ Could not import engine/RunConfig. Check PYTHONPATH.", file=sys.stderr)
+    raise
+
+try:
+    from core.reporting.aggregate import merge_results  # <- replace with the OAST-aware version you added
+except Exception as e:
+    print("❌ Could not import core.reporting.aggregate.merge_results", file=sys.stderr)
+    raise
+
+# HTML writer (prefer core/, else fallback to top-level reporting/)
 from core.reporting.writers.html_writer import write_html
 
-
-def load_pipeline(repo_root: Path, pipeline_name: str) -> dict:
+def _load_pipeline_yaml(pipeline_name: str, repo_root: Path) -> dict:
     """
-    Load and normalize a pipeline YAML:
-      - Path: <repo_root>/pipelines/<pipeline_name>.yaml
-      - Accepts:
-          • modules: [ "pkg.mod", {uses: "pkg.mod", with: {...}}, {"pkg.mod": {...}} ]
-          • stages:  [ {stage_name: ["pkg.mod", {"pkg.mod": {...}} , ...]}, ... ]
-      - Normalizes to: modules = [ {id, uses, with} ... ]
+    Load a pipeline YAML by name:
+      - tries pipelines/<name>.yaml, then <name>.yml
+      - if file not found, error out with a helpful message
     """
-    import yaml
-    p = repo_root / "pipelines" / f"{pipeline_name}.yaml"
-    if not p.exists():
-        raise FileNotFoundError(
-            f"Pipeline file not found: {p}\nTip: run from repo root or pass a valid --pipeline."
-        )
+    import yaml  # requires PyYAML
+    candidates = [
+        repo_root / "pipelines" / f"{pipeline_name}.yaml",
+        repo_root / "pipelines" / f"{pipeline_name}.yml",
+    ]
+    for p in candidates:
+        if p.exists():
+            return yaml.safe_load(p.read_text())
+    print(f"❌ Pipeline file not found for '{pipeline_name}'. "
+          f"Tried: {', '.join(str(p) for p in candidates)}", file=sys.stderr)
+    sys.exit(2)
 
+
+def _normalize_modules_and_extra(pcfg: dict) -> tuple[list[str], dict]:
+    """
+    Returns (modules, extra) for RunConfig:
+      - modules: ordered list of module IDs (strings)
+      - extra: dict keyed by module id -> module config (flatten 'with'/'args' if present)
+    Supports both {stages:[{module: id}]} and {modules:[id1,id2,...]} styles.
+    """
+    modules: list[str] = []
+    extra: dict = {}
+
+    if "modules" in pcfg and isinstance(pcfg["modules"], list):
+        # New style: modules: ["oast.interactsh", "web.zap", ...]
+        modules = [m for m in pcfg["modules"] if isinstance(m, str)]
+    elif "stages" in pcfg and isinstance(pcfg["stages"], list):
+        # Legacy style: stages: - { id: x, module: web.zap, inputs: {...} }
+        for st in pcfg["stages"]:
+            mid = st.get("module")
+            if mid:
+                modules.append(mid)
+                if "inputs" in st and isinstance(st["inputs"], dict):
+                    extra[mid] = st["inputs"]
+
+    # Flatten 'extra' section keyed by module id
+    # Your YAML uses:
+    # extra:
+    #   web.zap:
+    #     with: {...}
+    #   web.nuclei.basic:
+    #     args: "..."
+    if isinstance(pcfg.get("extra"), dict):
+        for mid, conf in pcfg["extra"].items():
+            if not isinstance(conf, dict):
+                extra[mid] = conf
+                continue
+            if "with" in conf:
+                extra[mid] = conf.get("with") or {}
+            elif "args" in conf:
+                # Keep args under 'args' key so the plugin can read it
+                extra[mid] = {"args": conf["args"]}
+            else:
+                extra[mid] = conf
+
+    # Make sure every module has a config dict
+    for mid in modules:
+        extra.setdefault(mid, {})
+
+    return modules, extra
+
+
+def _serialize_pipeline_result(res) -> str:
+    """
+    Convert PipelineResult (pydantic/dataclass/dict) to JSON string safely.
+    """
+    # pydantic v2
+    if hasattr(res, "model_dump_json"):
+        return res.model_dump_json()
+    # pydantic v1
+    if hasattr(res, "json"):
+        return res.json()
+    # dataclass or generic object with dict-like fields
     try:
-        print(f"[DEBUG] Loading pipeline from: {p}")
-        data = yaml.safe_load(p.read_text()) or {}
-    except Exception as e:
-        raise RuntimeError(f"Failed to parse YAML {p}: {e}")
-
-    if not isinstance(data, dict) or not data:
-        raise ValueError(f"Pipeline YAML {p} is empty or not a mapping. Got: {type(data).__name__}")
-
-    data.setdefault("name", pipeline_name)
-
-    # Prefer 'modules'; if absent, accept legacy 'stages'
-    modules = data.get("modules")
-    stages = data.get("stages") if modules is None else None
-
-    normalized = []
-
-    def to_mod(mod_like, idx: int, stage_name: str | None = None) -> dict:
-        """Convert one item (str/dict/single-key-dict) to {id, uses, with}."""
-        if isinstance(mod_like, str):
-            uses = mod_like
-            mod_id = (uses.split(":")[-1].replace("/", ".").split(".")[-1]) or f"mod{idx}"
-            if stage_name:
-                mod_id = f"{stage_name}_{mod_id}"
-            return {"id": mod_id, "uses": uses, "with": {}}
-
-        if isinstance(mod_like, dict):
-            # Case A: explicit dict with uses/id/with
-            if "uses" in mod_like or "id" in mod_like or "with" in mod_like:
-                uses = mod_like.get("uses")
-                if not isinstance(uses, str):
-                    # Try single-key merge form inside explicit dict: {id:.., with:.., "pkg.mod": {...}}
-                    other_keys = [k for k in mod_like.keys() if k not in {"id", "uses", "with"}]
-                    if len(other_keys) == 1 and isinstance(other_keys[0], str):
-                        uses = other_keys[0]
-                        payload = mod_like[other_keys[0]] or {}
-                        if not isinstance(payload, dict):
-                            raise TypeError(f"modules[{idx}] shorthand payload must be a dict")
-                        w = mod_like.get("with") or {}
-                        if not isinstance(w, dict):
-                            raise TypeError(f"modules[{idx}].with must be a dict")
-                        merged_with = {**payload, **w}
-                        mid = mod_like.get("id") or (uses.split(":")[-1].replace("/", ".").split(".")[-1]) or f"mod{idx}"
-                        if stage_name:
-                            mid = f"{stage_name}_{mid}"
-                        return {"id": mid, "uses": uses, "with": merged_with}
-                    raise KeyError(f"modules[{idx}] is missing a valid 'uses' string")
-                w = mod_like.get("with") or {}
-                if not isinstance(w, dict):
-                    raise TypeError(f"modules[{idx}].with must be a dict")
-                mid = mod_like.get("id") or (uses.split(":")[-1].replace("/", ".").split(".")[-1]) or f"mod{idx}"
-                if stage_name:
-                    mid = f"{stage_name}_{mid}"
-                return {"id": mid, "uses": uses, "with": w}
-
-            # Case B: single-key dict shorthand: {"pkg.mod": {...}}
-            if len(mod_like) == 1:
-                uses, payload = next(iter(mod_like.items()))
-                if not isinstance(uses, str):
-                    raise TypeError(f"modules[{idx}] key must be a string")
-                if payload is None:
-                    payload = {}
-                if not isinstance(payload, dict):
-                    raise TypeError(f"modules[{idx}] payload must be a dict")
-                mod_id = (uses.split(":")[-1].replace("/", ".").split(".")[-1]) or f"mod{idx}"
-                if stage_name:
-                    mod_id = f"{stage_name}_{mod_id}"
-                return {"id": mod_id, "uses": uses, "with": payload}
-
-            raise KeyError(f"modules[{idx}] dict is not in a supported form. Keys: {list(mod_like.keys())}")
-
-        if mod_like is None:
-            raise ValueError(f"modules[{idx}] is null/None. Did YAML have an empty '-' item?")
-
-        raise TypeError(f"modules[{idx}] must be str or dict, got {type(mod_like).__name__}")
-
-    if modules is not None:
-        if not isinstance(modules, list) or not modules:
-            raise ValueError(f"'modules' must be a non-empty list in {p}")
-        for i, m in enumerate(modules):
-            print(f"[DEBUG] modules[{i}] type={type(m).__name__} value={repr(m)}")
-            normalized.append(to_mod(m, i, None))
-    else:
-        # Handle legacy 'stages' as list of {stage_name: [items...]}
-        if not isinstance(stages, list) or not stages:
-            raise ValueError(f"'stages' must be a non-empty list in {p}")
-        idx = 0
-        for block in stages:
-            if not isinstance(block, dict) or len(block) != 1:
-                raise ValueError(f"Each item in 'stages' must be a single-key dict. Got: {repr(block)}")
-            stage_name, items = next(iter(block.items()))
-            if items is None:
-                items = []
-            if not isinstance(items, list):
-                raise TypeError(f"Stage '{stage_name}' value must be a list")
-            for item in items:
-                print(f"[DEBUG] stage='{stage_name}' item type={type(item).__name__} value={repr(item)}")
-                normalized.append(to_mod(item, idx, stage_name))
-                idx += 1
-
-    data["modules"] = normalized
-    print("[DEBUG] pipeline.name =", data["name"])
-    print("[DEBUG] modules =", [f"{m['id']}:{m['uses']}" for m in normalized])
-    return data
+        return json.dumps(res, default=lambda o: getattr(o, "__dict__", str(o)))
+    except Exception:
+        # assume it's already a dict-like
+        return json.dumps(res)
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--target", required=True)
-    ap.add_argument("--pipeline", default="web_default", help="Pipeline name (without .yaml)")
-    ap.add_argument("--data-dir", default="data/runs")
+    ap = argparse.ArgumentParser(description="Run a VAPT pipeline locally and render report.html")
+    ap.add_argument("--target", required=True, help="Target URL (e.g., http://testphp.vulnweb.com/)")
+    ap.add_argument("--pipeline", required=True, help="Pipeline name (e.g., web_active_plus_oast or web_default)")
     args = ap.parse_args()
 
-    # Resolve repo root relative to this file (works no matter your CWD)
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[1]  # project root
+    pipelines_dir = repo_root / "pipelines"
+    import sys
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    # ✅ import the right engine module explicitly
+    from core.pipeline import engine as pl_engine
+    # Load pipeline YAML
+    pcfg = _load_pipeline_yaml(args.pipeline, repo_root)
+    pipeline_name = pcfg.get("id") or args.pipeline
 
-    # Load pipeline safely
-    pipe = load_pipeline(repo_root, args.pipeline)
-    modules = pipe["modules"]
-
-    # Prepare run directories
-    rid = uuid.uuid4().hex[:12]
-    run_base = (repo_root / args.data_dir) / rid
-    inputs_dir   = run_base / "inputs"
-    workspace_dir= run_base / "workspace"
-    artifacts_dir= run_base / "artifacts"
-    reports_dir  = run_base / "reports"
-    for p in (inputs_dir, workspace_dir, artifacts_dir, reports_dir):
-        p.mkdir(parents=True, exist_ok=True)
-
-    # Submit job to in-memory worker
-    from apps.worker.worker import submit_job, worker_loop
-    job = {
-        "run_id": rid,
-        "target": args.target,
-        "pipeline_name": pipe["name"],
-        "modules": modules,
-        "workspace_dir": str(workspace_dir),
-        "artifacts_dir": str(artifacts_dir),
-        "inputs_dir": str(inputs_dir),
-        "reports_dir": str(reports_dir),
-        "extra": {}
-    }
-
-    # 🔧 add these two lines to satisfy RunConfig:
-    job["pipeline_id"] = job["pipeline_name"]
-    job["workdir"] = job["workspace_dir"]
-
-    submit_job(job)
-    worker_loop()  # dev: run immediately and exit when queue empty
-
-    # Aggregate results and write HTML
-    results_path = run_base / "results.json"
-    if not results_path.exists():
-        print(f"❌ results.json not found at {results_path}. Check worker logs.", file=sys.stderr)
+    # Normalize modules + extra configs
+    modules, extra = _normalize_modules_and_extra(pcfg)
+    if not modules:
+        print("❌ No modules found in pipeline YAML.", file=sys.stderr)
         sys.exit(2)
 
-    findings = merge_results(results_path)
-    tpl_dir = repo_root / "core" / "reporting" / "templates"
+    # Prepare run directories
+    rid = f"{int(time.time())}"
+    runs_dir = repo_root / "data" / "runs"
+    run_base = runs_dir / rid
+    workspace_dir = run_base / "workspace"
+    artifacts_dir = run_base / "artifacts"
+    reports_dir = workspace_dir / "reports"
+    for d in (workspace_dir, artifacts_dir, reports_dir):
+        d.mkdir(parents=True, exist_ok=True)
+
+    print(f"▶️  Running pipeline '{pipeline_name}' on target: {args.target}")
+    print(f"    Run ID: {rid}")
+    print(f"    Modules: {modules}")
+    import inspect, os
+    print("[DEBUG] run_pipeline from:", pl_engine.run_pipeline.__module__)
+    print("[DEBUG] file:", os.path.abspath(pl_engine.run_pipeline.__code__.co_filename))
+    print("[DEBUG] signature:", inspect.signature(pl_engine.run_pipeline))
+
+    # Execute pipeline locally via engine
+    run_cfg = RunConfig(
+    run_id=rid,
+    pipeline_id=pipeline_name,
+    pipeline_name=pipeline_name,
+    workdir=str(workspace_dir),                 # required by your engine
+    workspace_dir=str(workspace_dir),
+    artifacts_dir=str(artifacts_dir),
+
+    # ✅ add these two so _get() won’t return None
+    inputs_dir=str(run_base / "inputs"),
+    reports_dir=str(run_base / "reports"),
+
+    target=args.target,
+    modules=modules,
+    extra=extra,
+)
+
+
+
+    # if your engine signature is run_pipeline(cfg, modules):
+    from core.pipeline import engine as pl_engine
+    result = pl_engine.run_pipeline(run_cfg, modules)
+    # Persist raw results.json for debugging / later consumption
+    results_path = run_base / "results.json"
+    results_path.write_text(_serialize_pipeline_result(result))
+
+    # Merge → enrich (OAST) → dedupe
+    try:
+        findings = merge_results(results_path, workdir=workspace_dir)
+    except TypeError:
+        # Backward-compat: some merge_results accept only (path)
+        findings = merge_results(results_path)
+
+    findings_path = workspace_dir / "findings.json"
+    findings_path.write_text(json.dumps(findings, ensure_ascii=False, indent=2))
+
+    # Pick a template dir (core first, then fallback)
+    tpl_core = repo_root / "core" / "reporting" / "templates"
+    tpl_top = repo_root / "reporting" / "templates"
+    template_dir = tpl_core if tpl_core.exists() else tpl_top
+
+    # Render final HTML report
     out_html = reports_dir / "report.html"
-    write_html(findings, tpl_dir, out_html)
-    print(f"\n✅ Run {rid} complete.")
-    print(f"• Results JSON: {results_path}")
-    print(f"• HTML report : {out_html}")
+    write_html(findings, template_dir=template_dir, out_path=out_html, context={
+        "title": "VAPT Attack Report",
+        "run_id": rid,
+        "pipeline": pipeline_name,
+        "target": args.target,
+    })
+
+    print("\n✅ Done.")
+    print(f"   results.json:   {results_path}")
+    print(f"   findings.json:  {findings_path}")
+    print(f"   report.html:    {out_html}")
+    print(f"   workspace:      {workspace_dir}")
+
 
 if __name__ == "__main__":
     main()

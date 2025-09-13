@@ -1,191 +1,132 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+import sys, json, os, time, uuid, pathlib, subprocess, shlex, threading
+
 """
-oast.interactsh
-- mode="broker": writes an Interactsh session file (session_id, server)
-- mode="poll":   runs the client, captures events, correlates -> findings[]
-JSON I/O contract aligns with core pipeline (stdin -> stdout).
+Reads ModuleInput on stdin:
+{
+  "run_id": "...",
+  "workdir": "data/runs/<id>/workspace",
+  "inputs": {"server":"https://oast.pro","lifetime_sec":900,"poll_interval_sec":5},
+  "env": {}
+}
+
+Writes ModuleOutput on stdout with env containing OAST token+fqdn and starts a
+detached poller (interactsh-client) that keeps writing callbacks into:
+  <workdir>/oast/callbacks.json   (ndjson merged into JSON list by the poller)
+Also writes:
+  <workdir>/oast/poller.pid
+  <workdir>/oast/oast.log
 """
 
-import json, os, sys, time, uuid, pathlib, subprocess, shlex
-from typing import Dict, Any
+DEF_SERVER = "https://oast.pro"  # override with inputs.server or INTERACTSH_SERVER
+DOCKER_IMAGE = os.getenv("INTERACTSH_DOCKER_IMAGE", "projectdiscovery/interactsh-client:latest")
 
-def _read_stdin() -> Dict[str, Any]:
-    raw = sys.stdin.read()
-    return json.loads(raw) if raw.strip() else {}
-
-def _ensure_dir(p: pathlib.Path):
-    p.mkdir(parents=True, exist_ok=True)
-
-def _dump(path: pathlib.Path, data: Any):
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-
-def _load_map(maybe_path_or_dict):
-    # Accept dict or file path
-    if isinstance(maybe_path_or_dict, dict):
-        return maybe_path_or_dict
-    if isinstance(maybe_path_or_dict, str) and maybe_path_or_dict:
-        p = pathlib.Path(maybe_path_or_dict)
-        if p.exists():
-            return json.loads(p.read_text())
-    return {}
-
-def _open_debug(path: pathlib.Path):
-    return path.open("a", buffering=1, encoding="utf-8")
-
-def _docker_cmd(args):
-    extra = os.getenv("ZAP_DOCKER_EXTRA_ARGS", "")
-    base = ["docker", "run", "--rm", "-i"]
-    if extra:
-        base += shlex.split(extra)
-    return base + args
-
-def _interactsh_client_cmd(server: str):
-    image = os.getenv("INTERACTSH_DOCKER_IMAGE", "projectdiscovery/interactsh-client:latest")
-    cmd = _docker_cmd([image, "-json"])
-    if server:
-        cmd += ["-server", server]
-    return cmd
-
-def _emit(status="ok", artifacts=None, findings=None, stats=None):
-    print(json.dumps({
-        "status": status,
-        "artifacts": artifacts or [],
-        "findings": findings or [],
-        "stats": stats or {},
-    }, ensure_ascii=False))
+def _json_print(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    sys.stdout.flush()
 
 def main():
-    i = _read_stdin()
-    run_id   = i.get("run_id", f"run-{int(time.time())}")
-    workdir  = pathlib.Path(i.get("workdir", f"data/runs/{run_id}/workspace"))
-    inputs   = i.get("inputs", {}) or {}
-    mode     = inputs.get("mode", "broker")
-    server   = inputs.get("interactsh_server", os.getenv("INTERACTSH_SERVER", ""))
-    max_dur  = int(inputs.get("max_duration_sec", 120))
-    request_map_in = inputs.get("request_map", {})
+    cfg = json.load(sys.stdin)
+    run_id = cfg["run_id"]
+    workdir = pathlib.Path(cfg["workdir"])
+    inputs = cfg.get("inputs") or {}
+    server = inputs.get("server") or os.getenv("INTERACTSH_SERVER") or DEF_SERVER
+    lifetime = int(inputs.get("lifetime_sec") or os.getenv("INTERACTSH_LIFETIME_SEC") or 900)
+    poll_iv = int(inputs.get("poll_interval_sec") or os.getenv("INTERACTSH_POLL_IV") or 5)
 
     oast_dir = workdir / "oast"
-    _ensure_dir(oast_dir)
-    dbg_fp = _open_debug(oast_dir / "oast-debug.log")
+    oast_dir.mkdir(parents=True, exist_ok=True)
+    callbacks_path = oast_dir / "callbacks.json"
+    log_path = oast_dir / "oast.log"
+    pid_path = oast_dir / "poller.pid"
 
-    try:
-        if mode == "broker":
-            # Generate a session id and persist it for other modules to consume
-            session = {
-                "session_id": str(uuid.uuid4()),
-                "server": server or "auto",
-                "created_at": int(time.time())
-            }
-            sess_path = oast_dir / "interactsh-session.json"
-            _dump(sess_path, session)
-            dbg_fp.write(f"[broker] session created: {session['session_id']}\n")
-            _emit(
-                artifacts=[{"path": str(sess_path), "description":"OAST session", "content_type":"application/json"}],
-                stats={"mode": "broker"}
-            )
-            return
+    # Token + fqdn we will inject into payloads downstream
+    token = str(uuid.uuid4()).replace("-", "")[:12]
+    fqdn = f"{token}.oast.pro" if "oast." in server else f"{token}.oast.pro"
 
-        # POLL MODE
-        # 1) Build request map (to correlate callbacks -> original request)
-        request_map: Dict[str, Any] = _load_map(request_map_in)
-        if not request_map:
-            dbg_fp.write("[poll] warning: empty request_map; correlation may be limited\n")
+    # Start interactsh-client via Docker if available; fall back to "passive token" mode
+    docker_cmd = (
+        f"docker run --rm -i "
+        f"-v {shlex.quote(str(oast_dir))}:/data "
+        f"{DOCKER_IMAGE} "
+        f"-json -o /data/callbacks.ndjson -q"
+    )
+    # NOTE: The official client auto-registers and prints domain on startup.
+    # We detach it via a lightweight wrapper that keeps it alive; we also
+    # backfill callbacks.json by compacting NDJSON periodically.
 
-        # 2) Run interactsh-client in JSON streaming mode via Docker
-        events_path = oast_dir / "interactsh-events.jsonl"
-        cmd = _interactsh_client_cmd(server)
-        dbg_fp.write(f"[poll] cmd: {' '.join(shlex.quote(c) for c in cmd)}\n")
-        start = time.time()
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    def _poller():
+        # Write a small supervisor loop
+        with open(log_path, "a", encoding="utf-8") as lf:
+            lf.write(f"[poller] starting interactsh-client (docker image: {DOCKER_IMAGE})\n")
+            proc = None
+            try:
+                proc = subprocess.Popen(
+                    docker_cmd, shell=True, stdout=lf, stderr=lf, text=True
+                )
+                pid_path.write_text(str(proc.pid))
+                ndjson_path = oast_dir / "callbacks.ndjson"
+                started = time.time()
+                events = []
+                seen = 0
+                while time.time() - started < lifetime:
+                    time.sleep(poll_iv)
+                    # Compact NDJSON into a single JSON list for easy reading by aggregator
+                    if ndjson_path.exists():
+                        try:
+                            # Only append new events
+                            with ndjson_path.open("r", encoding="utf-8") as f:
+                                lines = f.readlines()
+                            if len(lines) > seen:
+                                for line in lines[seen:]:
+                                    line = line.strip()
+                                    if not line:
+                                        continue
+                                    try:
+                                        events.append(json.loads(line))
+                                    except Exception:
+                                        pass
+                                seen = len(lines)
+                                callbacks_path.write_text(json.dumps({"events": events}, ensure_ascii=False))
+                        except Exception as ex:
+                            lf.write(f"[poller] compact error: {ex}\n")
+                lf.write("[poller] lifetime reached, stopping client\n")
+            except FileNotFoundError:
+                with open(log_path, "a", encoding="utf-8") as lf2:
+                    lf2.write("[poller] docker not found; running in passive token-only mode\n")
+            finally:
+                if proc and proc.poll() is None:
+                    try:
+                        proc.terminate()
+                    except Exception:
+                        pass
 
-        # 3) Stream lines up to max_dur; persist raw events
-        findings = []
-        with events_path.open("w", encoding="utf-8") as outf:
-            while True:
-                if proc.poll() is not None:
-                    # process exited
-                    break
-                if time.time() - start >= max_dur:
-                    try: proc.terminate()
-                    except Exception: pass
-                    break
-                line = proc.stdout.readline()
-                if not line:
-                    time.sleep(0.05)
-                    continue
-                outf.write(line)
-                # parse incrementally for low-latency correlation
-                try:
-                    ev = json.loads(line)
-                except Exception as e:
-                    dbg_fp.write(f"[poll] parse error: {e}\n")
-                    continue
+    # Spawn the poller in the background and return immediately
+    t = threading.Thread(target=_poller, daemon=True)
+    t.start()
 
-                # common fields across interactsh-client
-                host = ev.get("full-id") or ev.get("unique-id") or ""
-                if not host:
-                    # fallback: sometimes 'raw-request' or 'qname' carries the id; keep raw evidence
-                    findings.append({
-                        "id": f"OAST-CALLBACK-{len(findings)+1}",
-                        "type": "oast_callback",
-                        "tool": "interactsh",
-                        "severity": "high",
-                        "confidence": "high",
-                        "location": "",
-                        "evidence": {"raw": ev},
-                        "tags": ["oast","callback"]
-                    })
-                    continue
+    # Minimal self-finding to indicate OAST session context
+    finding = {
+        "id": f"OAST-{token}",
+        "title": "OAST session initialized",
+        "severity": "info",
+        "tool": "oast",
+        "type": "oast.session",
+        "sources": ["oast"],
+        "evidence": {"callback_id": token, "server": server, "fqdn": fqdn}
+    }
 
-                # convention: <reqid>.<session>.<rest>
-                req_id = host.split(".", 1)[0] if "." in host else host
-                src = request_map.get(req_id, {})
-                finding = {
-                    "id": f"OAST-CALLBACK-{req_id}",
-                    "title": "Out-of-band interaction observed",
-                    "type": "oast_callback",
-                    "tool": "interactsh",
-                    "severity": "high",
-                    "confidence": "high",
-                    "location": src.get("url", ""),
-                    "method": src.get("method", "GET"),
-                    "parameter": src.get("param"),
-                    "evidence": {
-                        "host": host,
-                        "protocol": ev.get("protocol"),
-                        "timestamp": ev.get("timestamp"),
-                        "remote_addr": ev.get("remote-addr"),
-                        "raw": ev
-                    },
-                    "tags": ["oast","ssrf","xxe","blind"],
-                    "cwe": "CWE-918",     # SSRF (most common OAST trigger)
-                    "owasp": "A10:2021"   # Server-Side Request Forgery
-                }
-                findings.append(finding)
-
-        duration = int(time.time() - start)
-        dbg_fp.write(f"[poll] duration={duration}s findings={len(findings)}\n")
-
-        _emit(
-            artifacts=[
-                {"path": str(events_path), "description":"Interactsh events", "content_type":"application/x-ndjson"},
-                {"path": str(oast_dir / "oast-debug.log"), "description":"OAST debug", "content_type":"text/plain"}
-            ],
-            findings=findings,
-            stats={"mode":"poll","duration_sec": duration, "events": sum(1 for _ in events_path.open())}
-        )
-
-    except FileNotFoundError as e:
-        # docker not present or image missing
-        dbg_fp.write(f"[error] {e}\n")
-        _emit(status="error", stats={"error":"docker/image not found", "detail": str(e)})
-    except Exception as e:
-        dbg_fp.write(f"[error] {e}\n")
-        _emit(status="error", stats={"error": str(e)})
-    finally:
-        try: dbg_fp.close()
-        except Exception: pass
+    _json_print({
+        "status": "ok",
+        "artifacts": [
+            {"path": str(callbacks_path), "description": "OAST callbacks (compacted JSON)", "content_type": "application/json"},
+            {"path": str(pid_path), "description": "Poller PID", "content_type": "text/plain"},
+            {"path": str(log_path), "description": "OAST client log", "content_type": "text/plain"}
+        ],
+        "findings": [finding],
+        "stats": {"duration_sec": 1},
+        "env": {"OAST_TOKEN": token, "OAST_FQDN": fqdn, "OAST_SERVER": server}
+    })
 
 if __name__ == "__main__":
     main()

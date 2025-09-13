@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export ARTIFACTS_DIR="${ARTIFACTS_DIR:-/tmp/nuclei_artifacts}"
+export ENABLE_DEBUG_FILE="${ENABLE_DEBUG_FILE:-0}"
+exec /home/amitks/infosec-vapt-tool/.venv/bin/python3 core/plugins/web/nuclei/main.py

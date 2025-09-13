@@ -1,0 +1,5 @@
+id: report.html
+name: HTML Report Writer
+description: Consolidate findings to HTML
+runtime: process
+entrypoint: main.py

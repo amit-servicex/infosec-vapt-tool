@@ -1,2 +1,73 @@
-name: web_active_plus_oast
-stages: []
+id: web_active_plus_oast
+modules:
+  - oast.interactsh
+  - web.zap
+  - web.nuclei.basic
+  - web.ffuf
+  - web.sqlmap
+  - report.aggregate
+  - report.compliance_map
+  - report.html
+
+extra:
+  oast.interactsh:
+    with:
+      server: "https://oast.pro"
+      lifetime_sec: 1200
+      poll_interval_sec: 5
+
+  web.zap:
+    with:
+      mode: full
+      ajax_spider: true
+      max_duration_min: 15
+      risk_threshold: low
+      debug: true
+      include_patterns:
+        - "http://testphp.vulnweb.com/.*"
+      exclude_patterns:
+        - "http://testphp.vulnweb.com/(images|static|css|js)/.*"
+      extra_zap:
+        - "-config spiderAjax.browserId=0"
+        - "-config spider.maxDepth=10"
+        - "-config spider.maxChildren=4000"
+        - "-config ascan.scanOnlyInScope=true"
+        - "-config ascan.maxRuleDurationInMins=5"
+
+  web.nuclei.basic:
+    args: >
+      -follow-redirects
+      -severity medium,high,critical
+      -tags sqli,xss,cve,ssrf,rce,auth,exposure
+      -rate-limit 1500
+      -c 200
+      -timeout 15000
+      -retries 1
+      -project
+      -stats
+
+  web.ffuf:
+    with:
+      candidates_from: ["zap","nuclei"]
+      wordlists: ["configs/wordlists/quick.txt"]
+      attack: sniper
+      rate: 100
+      threads: 20
+      timeout_sec: 20
+      filters: []
+      matchers: ["-mc","200,302,401,403,500"]
+      extra_docker_args: ["--network","host"]
+
+  web.sqlmap:
+    with:
+      candidates_from: ["zap","nuclei","file"]
+      candidates_file: "workspace/urls.txt"   # << don’t use /artifacts
+      param_url_regex: "\\?.+=.+"
+      auto_promote_param_urls: true
+      target_host_filter: "testphp\\.vulnweb\\.com"
+      profile: standard
+      allow_deep: true
+      timeout_per_target_sec: 3600
+      max_targets: 30
+      risk: 3
+      level: 5

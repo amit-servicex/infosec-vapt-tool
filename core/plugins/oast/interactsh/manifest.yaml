@@ -1,15 +1,21 @@
 id: oast.interactsh
 version: "0.1.0"
-type: scan
+type: utility
+entrypoint: main.py
 inputs:
-  - mode              # "broker" (emit session) or "poll" (harvest callbacks)
-  - max_duration_sec  # poll duration (default 120)
-  - interactsh_server # optional custom server
-  - request_map       # file path or dict: {req_id: {url, method, param}}
+  server:
+    type: string
+    required: false
+    description: "Interactsh server base (e.g., https://oast.pro)"
+  lifetime_sec:
+    type: integer
+    required: false
+    description: "How long the background poller should run (default 900)"
+  poll_interval_sec:
+    type: integer
+    required: false
+    description: "Polling interval for client logs (default 5)"
 outputs:
-  - artifacts:
-      - "oast/interactsh-session.json"
-      - "oast/interactsh-events.jsonl"
-      - "oast/oast-debug.log"
   - findings: true
-capabilities: [ oast, passive ]
+  - artifacts: ["oast/callbacks.json", "oast/poller.pid", "oast/oast.log"]
+capabilities: [ "oast" ]

@@ -1,0 +1,5 @@
+id: report.compliance_map
+name: Compliance Mapper
+description: Annotate findings with PCI DSS & GDPR references
+runtime: process
+entrypoint: main.py

@@ -1,5 +1,7 @@
 from __future__ import annotations
-
+# top of file (imports)
+import time  # <-- add this
+import os    # <-- add this (only if you want the env toggle below)
 import json, subprocess, sys, shlex, os
 from datetime import datetime
 from enum import Enum
@@ -186,57 +188,147 @@ def _run_module_process(spec: ModuleSpec, m_input: Dict[str, Any]) -> Dict[str, 
 # -------- Orchestrator -------------------------------------------------------
 
 def run_pipeline(cfg: Any, module_specs_or_paths: List[Union[str, ModuleSpec]]) -> Dict[str, Any]:
-    def _get(k, d=None): return getattr(cfg,k, cfg.get(k,d) if isinstance(cfg,dict) else d)
+    """
+    Execute a pipeline described by `cfg` against the ordered list of module specs or IDs.
+    - cfg: RunConfig or dict-like; may contain run_id, target, pipeline_name/pipeline_id,
+           workspace_dir/workdir, artifacts_dir, inputs_dir, reports_dir, env, inputs, extra
+    - module_specs_or_paths: list of ModuleSpec or strings (module IDs or entrypoint paths)
+    Returns a dict with {run_id, pipeline_name, started_at, ended_at, results}
+    """
+    import os, time, traceback
+    from datetime import datetime
+    from pathlib import Path
 
+    # ---------- helpers ----------
+    def _get(k, d=None):
+        """getattr/lookup with 'None means default' semantics."""
+        v = None
+        if isinstance(cfg, dict):
+            v = cfg.get(k, None)
+        else:
+            v = getattr(cfg, k, None)
+        return d if v is None else v
+
+    # ensure directory exists
+    def _ensure_dir(p: Path):
+        p.mkdir(parents=True, exist_ok=True)
+
+    # ---------- config & dirs ----------
     run_id        = _get("run_id")
     target        = _get("target")
-    pipeline_name = _get("pipeline_name", _get("pipeline_id","pipeline"))
+    pipeline_name = _get("pipeline_name", _get("pipeline_id", "pipeline"))
     base_dir      = Path.cwd() / "data" / "runs" / (run_id or "run")
 
-    workspace_dir = Path(_get("workspace_dir", _get("workdir", base_dir / "workspace")))
-    artifacts_dir = Path(_get("artifacts_dir", base_dir / "artifacts"))
-    inputs_dir    = Path(_get("inputs_dir", base_dir / "inputs"))
-    reports_dir   = Path(_get("reports_dir", base_dir / "reports"))
-    for p in (workspace_dir, artifacts_dir, inputs_dir, reports_dir): _ensure_dir(p)
+    workspace_dir = Path(_get("workspace_dir", _get("workdir", str(base_dir / "workspace"))))
+    artifacts_dir = Path(_get("artifacts_dir", str(base_dir / "artifacts")))
+    inputs_dir    = Path(_get("inputs_dir",    str(base_dir / "inputs")))
+    reports_dir   = Path(_get("reports_dir",   str(base_dir / "reports")))
+    for p in (workspace_dir, artifacts_dir, inputs_dir, reports_dir):
+        _ensure_dir(p)
+
+    env_vars   = _get("env", {}) or {}
+    base_inputs = _get("inputs", {}) or {}
+    all_extra = _get("extra", {}) or {}
+    runtime_overrides = all_extra.get("__runtime__", {}) or {}
+
+    # progress printing (set VAPT_PROGRESS=0 to silence)
+    _progress = (os.environ.get("VAPT_PROGRESS", "1") != "0")
 
     started = datetime.utcnow()
     results: List[Dict[str, Any]] = []
     prev: Dict[str, Any] = {}
 
-    # Normalize to ModuleSpec list
+    # ---------- normalize module specs ----------
     specs: List[ModuleSpec] = []
     for item in module_specs_or_paths:
         if isinstance(item, ModuleSpec):
-            specs.append(item); continue
-        # If a string, try ID first, else treat as path (process)
+            specs.append(item)
+            continue
+        # If a string, try to resolve as module ID; else treat as entrypoint path.
         try:
             specs.append(resolve_ids([item])[0])
         except Exception:
+            # fall back to a process spec using a direct path
+            entry = _resolve_entrypoint(item)
             specs.append(ModuleSpec(
-                id=item, name=item, entrypoint=str(_resolve_entrypoint(item)), runtime="process"
+                id=item, name=item, entrypoint=str(entry), runtime="process"
             ))
 
-    job_overrides = (_get("extra", {}) or {}).get("__runtime__", {})
+    total = len(specs)
+
+    # ---------- run modules ----------
     for spec in specs:
-        override = job_overrides.get(spec.id, job_overrides.get("*"))
+        idx = len(results) + 1
+        if _progress:
+            print(f"[{idx}/{total}] ▶ {spec.id}", flush=True)
+        _t0 = time.time()
+
+        override = runtime_overrides.get(spec.id, runtime_overrides.get("*"))
         runtime = _decide_runtime(spec, override)
+
+        # Build standard ModuleInput passed on stdin to the plugin
         m_input = {
-            "run_id": run_id, "target": target,
-            "workspace_dir": workspace_dir, "artifacts_dir": artifacts_dir,
-            "inputs_dir": inputs_dir, "reports_dir": reports_dir,
-            "previous_outputs": prev, "config": {},
+            "run_id": run_id,
+            "target": target,
+            "workspace_dir": str(workspace_dir),
+            "artifacts_dir": str(artifacts_dir),
+            "inputs_dir": str(inputs_dir),
+            "reports_dir": str(reports_dir),
+            "previous_outputs": prev,
+            "inputs": base_inputs,
+            "env": env_vars,
+            "config": all_extra.get(spec.id, {})  # per-module config from YAML `extra:`
         }
-        res = _run_module_docker(spec, m_input) if runtime == "docker" else _run_module_process(spec, m_input)
+
+        try:
+            if runtime == "docker":
+                res = _run_module_docker(spec, m_input)
+            else:
+                res = _run_module_process(spec, m_input)
+        except Exception as e:
+            res = {
+                "status": "error",
+                "error": f"{type(e).__name__}: {e}",
+                "trace": traceback.format_exc(),
+                "findings": [],
+                "artifacts": [],
+                "stats": {}
+            }
+
+        # Normalize result
         res.setdefault("module_id", spec.id)
+        res.setdefault("status", "ok")
+        # ensure duration
+        stats = res.setdefault("stats", {})
+        if "duration_sec" not in stats:
+            stats["duration_sec"] = round(time.time() - _t0, 2)
+
         prev[spec.id] = res
         results.append(res)
-        if res.get("status") == "error" and m_input["config"].get("fail_fast"):
-            break
+
+        if _progress:
+            icon = "✅" if res.get("status") == "ok" else "❌"
+            print(f"[{idx}/{total}] {icon} {spec.id} done in {stats['duration_sec']}s", flush=True)
+
+        # optional fail-fast: respect per-module setting (config.fail_fast)
+        try:
+            if res.get("status") == "error" and bool(m_input["config"].get("fail_fast")):
+                if _progress:
+                    print(f"[{idx}/{total}] ⏹ fail_fast set; stopping pipeline after {spec.id}", flush=True)
+                break
+        except Exception:
+            pass
 
     ended = datetime.utcnow()
-    return {"run_id": run_id, "pipeline_name": pipeline_name,
-            "started_at": started.isoformat(), "ended_at": ended.isoformat(),
-            "results": results}
+    return {
+        "run_id": run_id,
+        "pipeline_name": pipeline_name,
+        "started_at": started.isoformat(),
+        "ended_at": ended.isoformat(),
+        "results": results
+    }
+
+
 
 
 def _decide_runtime(spec, job_override: str | None = None) -> str:

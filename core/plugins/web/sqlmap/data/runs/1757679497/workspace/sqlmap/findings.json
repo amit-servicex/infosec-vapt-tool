@@ -1,0 +1,268 @@
+{
+  "findings": [
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_artists.php_artist_1-artist",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=1",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "artist",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "artist=1 AND 1688=1688"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_artists.php_artist_2-artist",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=2",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "artist",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "artist=2 AND 4192=4192"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_artists.php_artist_3-artist",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/artists.php?artist=3",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "artist",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "artist=3 AND 2435=2435"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_artist_1-artist",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?artist=1",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "artist",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "artist=1 AND 2279=2279"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_artist_2-artist",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?artist=2",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "artist",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "artist=2 AND 3099=3099"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_cat_1-cat",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "cat",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "cat=1 AND 2058=2058"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_cat_2-cat",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=2",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "cat",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "cat=2 AND 7226=7226"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_cat_3-cat",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=3",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "cat",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "cat=3 AND 5020=(SELECT (CASE WHEN (5020=5020) THEN 5020 ELSE (SELECT 5870 UNION SELECT 3367) END))-- -"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_listproducts.php_cat_4-cat",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/listproducts.php?cat=4",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "cat",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "cat=4 AND 6956=(SELECT (CASE WHEN (6956=6956) THEN 6956 ELSE (SELECT 8071 UNION SELECT 8090) END))-- -"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_product.php_pic_6-pic",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/product.php?pic=6",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "pic",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "pic=6 AND 7394=7394"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SQLMAP-http_testphp.vulnweb.com_search.php_test_query-test",
+      "title": "SQL Injection confirmed",
+      "description": "Confirmed SQL injection via sqlmap.",
+      "severity": "high",
+      "location": "http://testphp.vulnweb.com/search.php?test=query",
+      "tool": "sqlmap",
+      "rule_id": "SQLMAP.SQLI",
+      "cwe": [
+        "CWE-89"
+      ],
+      "tags": [
+        "sqli",
+        "confirmed"
+      ],
+      "evidence": {
+        "param": "test",
+        "dbms": "MySQL >= 5.6",
+        "technique": "error-based",
+        "payload": "test=query' AND 2587=(SELECT (CASE WHEN (2587=2587) THEN 2587 ELSE (SELECT 3210 UNION SELECT 3901) END))-- -"
+      },
+      "confirmed": true,
+      "confidence": "high"
+    }
+  ]
+}

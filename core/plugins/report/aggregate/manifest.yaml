@@ -1,0 +1,5 @@
+id: report.aggregate
+name: Aggregate Findings
+description: Merge previous stage findings and enrich with OAST callbacks
+runtime: process
+entrypoint: main.py
